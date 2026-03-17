@@ -74,25 +74,21 @@ describe('AuthController', () => {
       email: 'test@example.com',
       password: 'password123',
     };
+    const user = {
+      id: 'uuid-1',
+      email: 'test@example.com',
+      name: 'Test User',
+      role: 'OPERATOR' as any,
+    };
     const loginResponse = { access_token: 'mock-jwt-token' };
 
     it('should return a JWT token', async () => {
       mockAuthService.login.mockResolvedValue(loginResponse);
 
-      const result = await controller.login(loginDto);
+      const result = await controller.login(loginDto, { user });
 
-      expect(service.login).toHaveBeenCalledWith(loginDto);
+      expect(service.login).toHaveBeenCalledWith(user);
       expect(result).toEqual(loginResponse);
-    });
-
-    it('should throw UnauthorizedException if credentials invalid', async () => {
-      mockAuthService.login.mockRejectedValue(
-        new UnauthorizedException('Invalid credentials'),
-      );
-
-      await expect(controller.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
     });
   });
 });

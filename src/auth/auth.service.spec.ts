@@ -57,7 +57,9 @@ describe('AuthService', () => {
         if (dto.email === 'existing@example.com') {
           throw new ConflictException('User with this email already exists');
         }
-        return { id: 'some-uuid', ...dto, password: 'hashedPassword' } as any; // reason: simplified user object for mock
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reason: password is sensitive and should not be returned
+        const { password, ...userWithoutPassword } = dto;
+        return { id: 'some-uuid', ...userWithoutPassword } as any; // reason: simplified user object for mock
       });
   });
 
@@ -169,47 +171,25 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    const loginDto: LoginDto = {
-      email: 'test@example.com',
-      password: 'password123',
-    };
     const user = {
       id: 'user-id',
       email: 'test@example.com',
-      password: 'hashedPassword',
       name: 'Test User',
+      role: 'OPERATOR' as any,
     };
 
     // Happy path
     it('should return an access token on successful login', async () => {
-      jest.spyOn(service, 'validateUser').mockResolvedValue(user);
       (jwtService.sign as jest.Mock).mockReturnValue('mockAccessToken');
 
-      const result = await service.login(loginDto);
+      const result = await service.login(user);
 
-      expect(service.validateUser).toHaveBeenCalledWith(
-        loginDto.email,
-        loginDto.password,
-      );
       expect(jwtService.sign).toHaveBeenCalledWith({
         email: user.email,
         sub: user.id,
+        role: user.role,
       });
       expect(result).toEqual({ access_token: 'mockAccessToken' });
-    });
-
-    // Error path: Invalid credentials (user not found or wrong password)
-    it('should throw UnauthorizedException for invalid credentials', async () => {
-      jest.spyOn(service, 'validateUser').mockResolvedValue(null);
-
-      await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      expect(service.validateUser).toHaveBeenCalledWith(
-        loginDto.email,
-        loginDto.password,
-      );
-      expect(jwtService.sign).not.toHaveBeenCalled();
     });
   });
 });
