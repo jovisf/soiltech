@@ -1,5 +1,16 @@
+# Dependencies
 node_modules
-# Keep environment variables out of version control
+/dist
+/coverage
+/.agents
+
+# Environment variables
 .env
 
-/generated/prisma
+# Nest
+.nest-cli.json
+tsconfig.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
