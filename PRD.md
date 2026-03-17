@@ -38,22 +38,22 @@
 
 ## TASK-2: Database Schema
 
-**Status**: IN_PROGRESS ([REVIEWER] phase)
+**Status**: VALIDATED ✓
 **Depends on**: TASK-1
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] `User` model with `id`, `email`, `name`, `password`, `role` (enum: `ADMIN`, `OPERATOR`, `VIEWER`), timestamps
-- [ ] `Farm` model with `id`, `name`, `latitude`, `longitude`, timestamps
-- [ ] `Pivot` model with `id`, `farmId`, `name`, `latitude`, `longitude`, `status` (JSON), `bladeAt100` (Float), timestamps
-- [ ] `State` model with `id`, `pivotId`, `timestamp`, `isOn`, `direction`, `isIrrigating`
-- [ ] `Cycle` model with `id`, `stateId`, `timestamp`, `angle`, `percentimeter`
-- [ ] Relations: Farm 1:N Pivot, Pivot 1:N State, State 1:N Cycle
-- [ ] UUID defaults on all `id` fields
-- [ ] Indexes on foreign keys (`farmId`, `pivotId`, `stateId`)
-- [ ] Migration generated and applied successfully
-- [ ] `@@map` used for snake_case table names
+- [x] `User` model with `id`, `email`, `name`, `password`, `role` (enum: `ADMIN`, `OPERATOR`, `VIEWER`), timestamps
+- [x] `Farm` model with `id`, `name`, `latitude`, `longitude`, timestamps
+- [x] `Pivot` model with `id`, `farmId`, `name`, `latitude`, `longitude`, `status` (JSON), `bladeAt100` (Float), timestamps
+- [x] `State` model with `id`, `pivotId`, `timestamp`, `isOn`, `direction`, `isIrrigating`
+- [x] `Cycle` model with `id`, `stateId`, `timestamp`, `angle`, `percentimeter`
+- [x] Relations: Farm 1:N Pivot, Pivot 1:N State, State 1:N Cycle
+- [x] UUID defaults on all `id` fields
+- [x] Indexes on foreign keys (`farmId`, `pivotId`, `stateId`)
+- [x] Migration generated and applied successfully
+- [x] `@@map` used for snake_case table names
 
 ### Implementation Protocol
 
@@ -69,7 +69,7 @@
 
 ## TASK-3: Auth Module
 
-**Status**: TODO
+**Status**: IN_PROGRESS ([REVIEWER] phase)
 **Depends on**: TASK-2
 **Estimated complexity**: L
 
