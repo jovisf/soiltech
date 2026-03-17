@@ -7,21 +7,22 @@
 
 ## TASK-1: Project Bootstrap
 
-**Status**: IN_PROGRESS ([TESTER] phase)
+**Status**: VALIDATED ✓
 **Depends on**: none
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] NestJS project initialized with TypeScript strict mode
-- [ ] Folder structure matches `GEMINI.md` Module Structure section
-- [ ] ESLint + Prettier configured with consistent rules
-- [ ] Path aliases configured in `tsconfig.json` (`@/common`, `@/auth`, etc.)
-- [ ] `ConfigModule` with Joi validation for all env vars in `.env.example`
-- [ ] `PrismaModule` and `PrismaService` created with `onModuleInit`/`onModuleDestroy` lifecycle
-- [ ] Prisma schema skeleton created (`datasource`, `generator`, no models yet)
-- [ ] `.env.example` created with all required variables
-- [ ] Application boots without errors via `npm run start:dev`
+- [x] NestJS project initialized with TypeScript strict mode
+- [x] Folder structure matches `GEMINI.md` Module Structure section
+- [x] ESLint + Prettier configured with consistent rules
+- [x] Path aliases configured in `tsconfig.json` (`@/common`, `@/auth`, etc.)
+- [x] `ConfigModule` with Joi validation for all env vars in `.env.example`
+- [x] `PrismaModule` and `PrismaService` created with `onModuleInit`/`onModuleDestroy` lifecycle
+- [x] Prisma schema skeleton created (`datasource`, `generator`, no models yet)
+- [x] `.env.example` created with all required variables
+- [x] Application boots without errors via `npm run start:dev`
+
 
 ### Implementation Protocol
 
