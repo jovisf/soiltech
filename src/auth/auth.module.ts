@@ -5,11 +5,10 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UsersModule } from '@/users/users.module';
-import { PrismaService } from '@/prisma/prisma.service'; // Added for validateUser to find user
 
 @Module({
   imports: [
-    UsersModule, // Import UsersModule to make UsersService available
+    UsersModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
