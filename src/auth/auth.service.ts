@@ -21,17 +21,7 @@ export class AuthService {
   ) {}
 
   async register(createUserDto: CreateUserDto) {
-    try {
-      const user = await this.usersService.create(createUserDto);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reason: password is sensitive and should not be returned
-      const { password, ...result } = user;
-      return result;
-    } catch (error) {
-      if (error instanceof ConflictException) {
-        throw new ConflictException('User with this email already exists');
-      }
-      throw error;
-    }
+    return this.usersService.create(createUserDto);
   }
 
   async validateUser(
@@ -47,12 +37,8 @@ export class AuthService {
     return null;
   }
 
-  async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    const payload = { email: user.email, sub: user.id };
+  async login(user: Omit<User, 'password'>) {
+    const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
     };
