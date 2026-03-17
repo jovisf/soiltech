@@ -69,22 +69,22 @@
 
 ## TASK-3: Auth Module
 
-**Status**: IN_PROGRESS ([REVIEWER] phase)
+**Status**: VALIDATED ✓
 **Depends on**: TASK-2
 **Estimated complexity**: L
 
 ### Acceptance Criteria
 
-- [ ] `POST /auth/login` endpoint accepts `{ email, password }` and returns `{ access_token }`
-- [ ] JWT strategy implemented via `@nestjs/passport` + `passport-jwt`
-- [ ] Passwords hashed with bcrypt (min 10 salt rounds)
-- [ ] `JwtAuthGuard` reusable guard in `src/common/guards/`
-- [ ] `RolesGuard` checks user role against `@Roles()` decorator
-- [ ] `@Roles()` custom decorator in `src/common/decorators/`
-- [ ] Roles enum: `ADMIN`, `OPERATOR`, `VIEWER`
-- [ ] 401 returned for missing/invalid/expired token
-- [ ] 403 returned for insufficient role
-- [ ] Auth module exports `JwtAuthGuard` for use in other modules
+- [x] `POST /auth/login` endpoint accepts `{ email, password }` and returns `{ access_token }`
+- [x] JWT strategy implemented via `@nestjs/passport` + `passport-jwt`
+- [x] Passwords hashed with bcrypt (min 10 salt rounds)
+- [x] `JwtAuthGuard` reusable guard in `src/common/guards/`
+- [x] `RolesGuard` checks user role against `@Roles()` decorator
+- [x] `@Roles()` custom decorator in `src/common/decorators/`
+- [x] Roles enum: `ADMIN`, `OPERATOR`, `VIEWER`
+- [x] 401 returned for missing/invalid/expired token
+- [x] 403 returned for insufficient role
+- [x] Auth module exports `JwtAuthGuard` for use in other modules
 
 ### Implementation Protocol
 
