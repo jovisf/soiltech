@@ -71,7 +71,9 @@ describe('ConfigService', () => {
 
   describe('getDatabaseUrl', () => {
     it('should return the database URL', () => {
-      expect(service.getDatabaseUrl()).toBe('postgresql://user:password@host:port/database');
+      expect(service.getDatabaseUrl()).toBe(
+        'postgresql://user:password@host:port/database',
+      );
       expect(nestConfigService.get).toHaveBeenCalledWith('DATABASE_URL');
     });
   });
@@ -106,7 +108,9 @@ describe('ConfigService', () => {
 
   describe('getAwsIotEndpoint', () => {
     it('should return the AWS IoT endpoint', () => {
-      expect(service.getAwsIotEndpoint()).toBe('test.iot.us-east-1.amazonaws.com');
+      expect(service.getAwsIotEndpoint()).toBe(
+        'test.iot.us-east-1.amazonaws.com',
+      );
       expect(nestConfigService.get).toHaveBeenCalledWith('AWS_IOT_ENDPOINT');
     });
   });
@@ -148,8 +152,12 @@ describe('ConfigService', () => {
 
   describe('getWeatherApiBaseUrl', () => {
     it('should return the weather API base URL', () => {
-      expect(service.getWeatherApiBaseUrl()).toBe('https://api.test-weather.com');
-      expect(nestConfigService.get).toHaveBeenCalledWith('WEATHER_API_BASE_URL');
+      expect(service.getWeatherApiBaseUrl()).toBe(
+        'https://api.test-weather.com',
+      );
+      expect(nestConfigService.get).toHaveBeenCalledWith(
+        'WEATHER_API_BASE_URL',
+      );
     });
   });
 

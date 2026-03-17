@@ -3,7 +3,10 @@ import { UsersService } from './users.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreateUserDto } from '@/auth/dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { MockPrismaService, createMockPrismaService } from 'test/helpers/prisma-mock';
+import {
+  MockPrismaService,
+  createMockPrismaService,
+} from 'test/helpers/prisma-mock';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
@@ -49,7 +52,11 @@ describe('UsersService', () => {
       password: 'password123',
       name: 'Test User',
     };
-    const createdUser = { id: 'user-id-1', ...createUserDto, password: 'hashed_password123' };
+    const createdUser = {
+      id: 'user-id-1',
+      ...createUserDto,
+      password: 'hashed_password123',
+    };
 
     // Happy path
     it('should create a new user and hash the password', async () => {
@@ -82,8 +89,18 @@ describe('UsersService', () => {
 
   describe('findAll', () => {
     const users = [
-      { id: 'user-id-1', email: 'test1@example.com', name: 'User 1', password: 'hashed1' },
-      { id: 'user-id-2', email: 'test2@example.com', name: 'User 2', password: 'hashed2' },
+      {
+        id: 'user-id-1',
+        email: 'test1@example.com',
+        name: 'User 1',
+        password: 'hashed1',
+      },
+      {
+        id: 'user-id-2',
+        email: 'test2@example.com',
+        name: 'User 2',
+        password: 'hashed2',
+      },
     ];
 
     // Happy path
@@ -109,7 +126,12 @@ describe('UsersService', () => {
 
   describe('findOne', () => {
     const userId = 'user-id-1';
-    const user = { id: userId, email: 'test1@example.com', name: 'User 1', password: 'hashed1' };
+    const user = {
+      id: userId,
+      email: 'test1@example.com',
+      name: 'User 1',
+      password: 'hashed1',
+    };
 
     // Happy path
     it('should return a user by ID', async () => {
@@ -117,7 +139,9 @@ describe('UsersService', () => {
 
       const result = await service.findOne(userId);
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: userId },
+      });
       expect(result).toEqual(user);
     });
 
@@ -134,7 +158,12 @@ describe('UsersService', () => {
   describe('update', () => {
     const userId = 'user-id-1';
     const updateUserDto: UpdateUserDto = { name: 'Updated Name' };
-    const updatedUser = { id: userId, email: 'test1@example.com', name: 'Updated Name', password: 'hashed1' };
+    const updatedUser = {
+      id: userId,
+      email: 'test1@example.com',
+      name: 'Updated Name',
+      password: 'hashed1',
+    };
 
     // Happy path: Update name
     it('should update an existing user', async () => {
@@ -203,7 +232,12 @@ describe('UsersService', () => {
 
   describe('remove', () => {
     const userId = 'user-id-1';
-    const removedUser = { id: userId, email: 'test1@example.com', name: 'User 1', password: 'hashed1' };
+    const removedUser = {
+      id: userId,
+      email: 'test1@example.com',
+      name: 'User 1',
+      password: 'hashed1',
+    };
 
     // Happy path
     it('should remove a user by ID', async () => {
@@ -211,7 +245,9 @@ describe('UsersService', () => {
 
       const result = await service.remove(userId);
 
-      expect(prismaService.user.delete).toHaveBeenCalledWith({ where: { id: userId } });
+      expect(prismaService.user.delete).toHaveBeenCalledWith({
+        where: { id: userId },
+      });
       expect(result).toEqual(removedUser);
     });
 

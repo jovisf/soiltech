@@ -60,5 +60,4 @@ export class ConfigService {
   getWeatherCacheTtl(): number {
     return this.nestConfigService.get<number>('WEATHER_CACHE_TTL')!;
   }
-
 }

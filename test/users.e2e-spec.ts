@@ -18,7 +18,10 @@ describe('UsersController (e2e)', () => {
   };
 
   beforeAll(async () => {
-    console.log('e2e test (users): process.env.DATABASE_URL =', process.env.DATABASE_URL);
+    console.log(
+      'e2e test (users): process.env.DATABASE_URL =',
+      process.env.DATABASE_URL,
+    );
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -51,7 +54,15 @@ describe('UsersController (e2e)', () => {
   afterAll(async () => {
     // Clean up test user
     await prismaService.user.deleteMany({
-      where: { email: { in: [testUser.email, 'e2e-user-update@example.com', 'post-user-test@example.com'] } },
+      where: {
+        email: {
+          in: [
+            testUser.email,
+            'e2e-user-update@example.com',
+            'post-user-test@example.com',
+          ],
+        },
+      },
     });
     await app.close();
   });
@@ -91,10 +102,12 @@ describe('UsersController (e2e)', () => {
         .send(invalidUserDto)
         .expect(400)
         .expect((res) => {
-          expect(res.body.message).toEqual(expect.arrayContaining([
-            'email must be an email',
-            'password must be longer than or equal to 6 characters',
-          ]));
+          expect(res.body.message).toEqual(
+            expect.arrayContaining([
+              'email must be an email',
+              'password must be longer than or equal to 6 characters',
+            ]),
+          );
         });
     });
 
@@ -264,7 +277,9 @@ describe('UsersController (e2e)', () => {
 
     // Error path: Unauthorized
     it('should return 401 without a token', () => {
-      return request(app.getHttpServer()).delete(`/users/${userToDeleteId}`).expect(401);
+      return request(app.getHttpServer())
+        .delete(`/users/${userToDeleteId}`)
+        .expect(401);
     });
 
     // Error path: Not Found (after deletion)

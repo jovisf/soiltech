@@ -23,4 +23,3 @@ import { PrismaService } from '@/prisma/prisma.service'; // Added for validateUs
   providers: [AuthService],
 })
 export class AuthModule {}
-

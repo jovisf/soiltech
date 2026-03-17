@@ -43,7 +43,11 @@ describe('AuthController', () => {
       password: 'password123',
       name: 'Test User',
     };
-    const resultUser = { id: 'uuid-1', email: 'test@example.com', name: 'Test User' };
+    const resultUser = {
+      id: 'uuid-1',
+      email: 'test@example.com',
+      name: 'Test User',
+    };
 
     it('should register a new user', async () => {
       mockAuthService.register.mockResolvedValue(resultUser);
@@ -55,14 +59,21 @@ describe('AuthController', () => {
     });
 
     it('should throw ConflictException if email is duplicate', async () => {
-      mockAuthService.register.mockRejectedValue(new ConflictException('User exists'));
+      mockAuthService.register.mockRejectedValue(
+        new ConflictException('User exists'),
+      );
 
-      await expect(controller.createUser(createUserDto)).rejects.toThrow(ConflictException);
+      await expect(controller.createUser(createUserDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
   describe('login', () => {
-    const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
+    const loginDto: LoginDto = {
+      email: 'test@example.com',
+      password: 'password123',
+    };
     const loginResponse = { access_token: 'mock-jwt-token' };
 
     it('should return a JWT token', async () => {
@@ -75,9 +86,13 @@ describe('AuthController', () => {
     });
 
     it('should throw UnauthorizedException if credentials invalid', async () => {
-      mockAuthService.login.mockRejectedValue(new UnauthorizedException('Invalid credentials'));
+      mockAuthService.login.mockRejectedValue(
+        new UnauthorizedException('Invalid credentials'),
+      );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(controller.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

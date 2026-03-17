@@ -58,14 +58,20 @@ describe('UsersController', () => {
     });
 
     it('should throw ConflictException if service throws it', async () => {
-      mockUsersService.create.mockRejectedValue(new ConflictException('User already exists'));
+      mockUsersService.create.mockRejectedValue(
+        new ConflictException('User already exists'),
+      );
 
-      await expect(controller.create(createUserDto)).rejects.toThrow(ConflictException);
+      await expect(controller.create(createUserDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
   describe('findAll', () => {
-    const users = [{ id: 'uuid-1', email: 'test1@example.com', name: 'User 1' }];
+    const users = [
+      { id: 'uuid-1', email: 'test1@example.com', name: 'User 1' },
+    ];
 
     it('should return an array of users', async () => {
       mockUsersService.findAll.mockResolvedValue(users);
@@ -91,16 +97,24 @@ describe('UsersController', () => {
     });
 
     it('should throw NotFoundException if service throws it', async () => {
-      mockUsersService.findOne.mockRejectedValue(new NotFoundException('User not found'));
+      mockUsersService.findOne.mockRejectedValue(
+        new NotFoundException('User not found'),
+      );
 
-      await expect(controller.findOne(userId)).rejects.toThrow(NotFoundException);
+      await expect(controller.findOne(userId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('update', () => {
     const userId = 'uuid-1';
     const updateUserDto: UpdateUserDto = { name: 'Updated Name' };
-    const updatedUser = { id: userId, email: 'test1@example.com', name: 'Updated Name' };
+    const updatedUser = {
+      id: userId,
+      email: 'test1@example.com',
+      name: 'Updated Name',
+    };
 
     it('should update a user', async () => {
       mockUsersService.update.mockResolvedValue(updatedUser);
@@ -112,15 +126,23 @@ describe('UsersController', () => {
     });
 
     it('should throw NotFoundException if service throws it', async () => {
-      mockUsersService.update.mockRejectedValue(new NotFoundException('User not found'));
+      mockUsersService.update.mockRejectedValue(
+        new NotFoundException('User not found'),
+      );
 
-      await expect(controller.update(userId, updateUserDto)).rejects.toThrow(NotFoundException);
+      await expect(controller.update(userId, updateUserDto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('remove', () => {
     const userId = 'uuid-1';
-    const removedUser = { id: userId, email: 'test1@example.com', name: 'User 1' };
+    const removedUser = {
+      id: userId,
+      email: 'test1@example.com',
+      name: 'User 1',
+    };
 
     it('should remove a user', async () => {
       mockUsersService.remove.mockResolvedValue(removedUser);
@@ -132,9 +154,13 @@ describe('UsersController', () => {
     });
 
     it('should throw NotFoundException if service throws it', async () => {
-      mockUsersService.remove.mockRejectedValue(new NotFoundException('User not found'));
+      mockUsersService.remove.mockRejectedValue(
+        new NotFoundException('User not found'),
+      );
 
-      await expect(controller.remove(userId)).rejects.toThrow(NotFoundException);
+      await expect(controller.remove(userId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

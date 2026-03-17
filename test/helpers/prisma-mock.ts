@@ -1,5 +1,5 @@
 // test/helpers/prisma-mock.ts
-import { PrismaService } from "@/prisma/prisma.service";
+import { PrismaService } from '@/prisma/prisma.service';
 
 export type MockPrismaService = {
   [K in keyof PrismaService]: jest.Mocked<Record<string, jest.Mock>>;

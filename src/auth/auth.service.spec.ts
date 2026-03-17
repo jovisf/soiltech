@@ -4,7 +4,10 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
-import { MockPrismaService, createMockPrismaService } from 'test/helpers/prisma-mock';
+import {
+  MockPrismaService,
+  createMockPrismaService,
+} from 'test/helpers/prisma-mock';
 import * as bcrypt from 'bcrypt';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '@/users/users.service';
@@ -48,12 +51,14 @@ describe('AuthService', () => {
     usersService = module.get<UsersService>(UsersService);
 
     // Mock UsersService methods as they are used by AuthService
-    jest.spyOn(usersService, 'create').mockImplementation(async (dto: CreateUserDto) => {
-      if (dto.email === 'existing@example.com') {
-        throw new ConflictException('User with this email already exists');
-      }
-      return { id: 'some-uuid', ...dto, password: 'hashedPassword' } as any; // reason: simplified user object for mock
-    });
+    jest
+      .spyOn(usersService, 'create')
+      .mockImplementation(async (dto: CreateUserDto) => {
+        if (dto.email === 'existing@example.com') {
+          throw new ConflictException('User with this email already exists');
+        }
+        return { id: 'some-uuid', ...dto, password: 'hashedPassword' } as any; // reason: simplified user object for mock
+      });
   });
 
   afterEach(() => {
@@ -76,7 +81,9 @@ describe('AuthService', () => {
       const result = await service.register(createUserDto);
 
       expect(usersService.create).toHaveBeenCalledWith(createUserDto);
-      expect(result).toEqual(expect.objectContaining({ email: 'test@example.com' }));
+      expect(result).toEqual(
+        expect.objectContaining({ email: 'test@example.com' }),
+      );
       expect(result).not.toHaveProperty('password');
     });
 
@@ -88,23 +95,40 @@ describe('AuthService', () => {
         name: 'Existing User',
       };
 
-      await expect(service.register(createUserDto)).rejects.toThrow(ConflictException);
+      await expect(service.register(createUserDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
   describe('validateUser', () => {
-    const user = { id: 'user-id', email: 'test@example.com', password: 'hashedPassword', name: 'Test User' };
+    const user = {
+      id: 'user-id',
+      email: 'test@example.com',
+      password: 'hashedPassword',
+      name: 'Test User',
+    };
 
     // Happy path
     it('should return the user if credentials are valid', async () => {
       prismaService.user.findUnique.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.validateUser('test@example.com', 'password123');
+      const result = await service.validateUser(
+        'test@example.com',
+        'password123',
+      );
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
-      expect(bcrypt.compare).toHaveBeenCalledWith('password123', 'hashedPassword');
-      expect(result).toEqual(expect.objectContaining({ email: 'test@example.com' }));
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'password123',
+        'hashedPassword',
+      );
+      expect(result).toEqual(
+        expect.objectContaining({ email: 'test@example.com' }),
+      );
       expect(result).not.toHaveProperty('password');
     });
 
@@ -113,10 +137,18 @@ describe('AuthService', () => {
       prismaService.user.findUnique.mockResolvedValue(user);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      const result = await service.validateUser('test@example.com', 'wrongpassword');
+      const result = await service.validateUser(
+        'test@example.com',
+        'wrongpassword',
+      );
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { email: 'test@example.com' } });
-      expect(bcrypt.compare).toHaveBeenCalledWith('wrongpassword', 'hashedPassword');
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
+      });
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'wrongpassword',
+        'hashedPassword',
+      );
       expect(result).toBeNull();
     });
 
@@ -124,16 +156,29 @@ describe('AuthService', () => {
     it('should return null if user is not found', async () => {
       prismaService.user.findUnique.mockResolvedValue(null);
 
-      const result = await service.validateUser('nonexistent@example.com', 'password123');
+      const result = await service.validateUser(
+        'nonexistent@example.com',
+        'password123',
+      );
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { email: 'nonexistent@example.com' } });
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email: 'nonexistent@example.com' },
+      });
       expect(result).toBeNull();
     });
   });
 
   describe('login', () => {
-    const loginDto: LoginDto = { email: 'test@example.com', password: 'password123' };
-    const user = { id: 'user-id', email: 'test@example.com', password: 'hashedPassword', name: 'Test User' };
+    const loginDto: LoginDto = {
+      email: 'test@example.com',
+      password: 'password123',
+    };
+    const user = {
+      id: 'user-id',
+      email: 'test@example.com',
+      password: 'hashedPassword',
+      name: 'Test User',
+    };
 
     // Happy path
     it('should return an access token on successful login', async () => {
@@ -142,8 +187,14 @@ describe('AuthService', () => {
 
       const result = await service.login(loginDto);
 
-      expect(service.validateUser).toHaveBeenCalledWith(loginDto.email, loginDto.password);
-      expect(jwtService.sign).toHaveBeenCalledWith({ email: user.email, sub: user.id });
+      expect(service.validateUser).toHaveBeenCalledWith(
+        loginDto.email,
+        loginDto.password,
+      );
+      expect(jwtService.sign).toHaveBeenCalledWith({
+        email: user.email,
+        sub: user.id,
+      });
       expect(result).toEqual({ access_token: 'mockAccessToken' });
     });
 
@@ -151,8 +202,13 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException for invalid credentials', async () => {
       jest.spyOn(service, 'validateUser').mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
-      expect(service.validateUser).toHaveBeenCalledWith(loginDto.email, loginDto.password);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(service.validateUser).toHaveBeenCalledWith(
+        loginDto.email,
+        loginDto.password,
+      );
       expect(jwtService.sign).not.toHaveBeenCalled();
     });
   });

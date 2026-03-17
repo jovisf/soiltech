@@ -9,14 +9,18 @@ describe('PrismaService', () => {
     // Since PrismaService extends PrismaClient, we can mock the prototype methods
     // or just mock the instance methods after creation.
     // But since construction itself might fail, we mock the module.
-    
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         {
           provide: PrismaService,
           useValue: {
-            onModuleInit: jest.fn().mockImplementation(async function() { await this.$connect(); }),
-            onModuleDestroy: jest.fn().mockImplementation(async function() { await this.$disconnect(); }),
+            onModuleInit: jest.fn().mockImplementation(async function () {
+              await this.$connect();
+            }),
+            onModuleDestroy: jest.fn().mockImplementation(async function () {
+              await this.$disconnect();
+            }),
             $connect: jest.fn().mockResolvedValue(undefined),
             $disconnect: jest.fn().mockResolvedValue(undefined),
           },

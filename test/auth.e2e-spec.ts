@@ -18,7 +18,10 @@ describe('AuthController (e2e)', () => {
   };
 
   beforeAll(async () => {
-    console.log('e2e test (auth): process.env.DATABASE_URL =', process.env.DATABASE_URL);
+    console.log(
+      'e2e test (auth): process.env.DATABASE_URL =',
+      process.env.DATABASE_URL,
+    );
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
