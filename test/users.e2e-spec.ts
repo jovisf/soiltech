@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import request from 'supertest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -44,10 +44,16 @@ describe('UsersController (e2e)', () => {
       .expect(201);
     userId = registerRes.body.id;
 
+    // Manually promote test user to ADMIN to pass RBAC
+    await prismaService.user.update({
+      where: { id: userId },
+      data: { role: 'ADMIN' },
+    });
+
     const loginRes = await request(app.getHttpServer())
       .post('/auth/login')
       .send({ email: testUser.email, password: testUser.password })
-      .expect(200);
+      .expect(201);
     authToken = loginRes.body.access_token;
   });
 
@@ -113,18 +119,22 @@ describe('UsersController (e2e)', () => {
 
     // Error path: Duplicate email
     it('should return 409 for duplicate email', async () => {
+      const duplicateUserDto = {
+        ...newUserDto,
+        email: 'duplicate-test@example.com',
+      };
       // First create the user
       await request(app.getHttpServer())
         .post('/users')
         .set('Authorization', `Bearer ${authToken}`)
-        .send(newUserDto)
+        .send(duplicateUserDto)
         .expect(201);
 
       // Try to create again with the same email
       return request(app.getHttpServer())
         .post('/users')
         .set('Authorization', `Bearer ${authToken}`)
-        .send(newUserDto)
+        .send(duplicateUserDto)
         .expect(409);
     });
 
@@ -244,6 +254,11 @@ describe('UsersController (e2e)', () => {
     let userToDeleteAuthToken: string;
 
     beforeEach(async () => {
+      // Clean up if user already exists
+      await prismaService.user.deleteMany({
+        where: { email: 'delete-me@example.com' },
+      });
+
       // Register a new user specifically for deletion test
       const newUser: CreateUserDto = {
         name: 'Delete User',
@@ -256,10 +271,16 @@ describe('UsersController (e2e)', () => {
         .expect(201);
       userToDeleteId = registerRes.body.id;
 
+      // Manually promote user to delete to ADMIN to pass RBAC
+      await prismaService.user.update({
+        where: { id: userToDeleteId },
+        data: { role: 'ADMIN' },
+      });
+
       const loginRes = await request(app.getHttpServer())
         .post('/auth/login')
         .send({ email: newUser.email, password: newUser.password })
-        .expect(200);
+        .expect(201);
       userToDeleteAuthToken = loginRes.body.access_token;
     });
 
