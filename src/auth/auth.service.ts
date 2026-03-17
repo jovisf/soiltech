@@ -6,9 +6,10 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@/prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '@/users/users.service';
+import { excludePassword } from '@/common/utils/prisma.utils';
 
 import { User } from '@prisma/client';
 
@@ -21,7 +22,9 @@ export class AuthService {
   ) {}
 
   async register(createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reason: role assignment only by admin
+    const { role, ...userData } = createUserDto;
+    return this.usersService.create(userData as CreateUserDto);
   }
 
   async validateUser(
@@ -30,9 +33,7 @@ export class AuthService {
   ): Promise<Omit<User, 'password'> | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (user && (await bcrypt.compare(pass, user.password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reason: password is sensitive and should not be returned
-      const { password, ...result } = user;
-      return result;
+      return excludePassword(user);
     }
     return null;
   }

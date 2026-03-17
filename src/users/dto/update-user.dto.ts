@@ -5,12 +5,7 @@ import {
   MinLength,
   IsEnum,
 } from 'class-validator';
-
-export enum Role {
-  ADMIN = 'ADMIN',
-  OPERATOR = 'OPERATOR',
-  VIEWER = 'VIEWER',
-}
+import { Role } from '@prisma/client';
 
 export class UpdateUserDto {
   @IsEmail()

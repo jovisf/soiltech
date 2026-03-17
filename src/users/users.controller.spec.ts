@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { CreateUserDto } from '@/auth/dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { NotFoundException, ConflictException } from '@nestjs/common';
 
@@ -80,6 +80,21 @@ describe('UsersController', () => {
 
       expect(service.findAll).toHaveBeenCalled();
       expect(result).toEqual(users);
+    });
+  });
+
+  describe('getMe', () => {
+    const userId = 'uuid-1';
+    const user = { id: userId, email: 'test1@example.com', name: 'User 1' };
+
+    it('should return the current user profile', async () => {
+      mockUsersService.findOne.mockResolvedValue(user);
+      const req = { user: { id: userId } };
+
+      const result = await controller.getMe(req);
+
+      expect(service.findOne).toHaveBeenCalledWith(userId);
+      expect(result).toEqual(user);
     });
   });
 

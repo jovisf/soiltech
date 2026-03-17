@@ -3,21 +3,16 @@ import {
   NotFoundException,
   ConflictException,
 } from '@nestjs/common';
-import { CreateUserDto } from '@/auth/dto/create-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '@/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { Prisma, User } from '@prisma/client';
+import { excludePassword } from '@/common/utils/prisma.utils';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
-
-  private excludePassword<T extends User>(user: T): Omit<T, 'password'> {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reason: password is sensitive and should not be returned
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
-  }
 
   async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -28,7 +23,7 @@ export class UsersService {
           password: hashedPassword,
         },
       });
-      return this.excludePassword(user);
+      return excludePassword(user);
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -42,7 +37,7 @@ export class UsersService {
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
     const users = await this.prisma.user.findMany();
-    return users.map((user) => this.excludePassword(user));
+    return users.map((user) => excludePassword(user));
   }
 
   async findOne(id: string): Promise<Omit<User, 'password'>> {
@@ -50,7 +45,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }
-    return this.excludePassword(user);
+    return excludePassword(user);
   }
 
   async update(
@@ -66,7 +61,7 @@ export class UsersService {
         where: { id },
         data,
       });
-      return this.excludePassword(user);
+      return excludePassword(user);
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -87,7 +82,7 @@ export class UsersService {
   async remove(id: string): Promise<Omit<User, 'password'>> {
     try {
       const user = await this.prisma.user.delete({ where: { id } });
-      return this.excludePassword(user);
+      return excludePassword(user);
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
