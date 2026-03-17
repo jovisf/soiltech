@@ -23,8 +23,8 @@ model User {
   name      String
   password  String
   role      Role      @default(VIEWER)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -34,8 +34,8 @@ model Farm {
   name      String
   latitude  Float
   longitude Float
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
   pivots    Pivot[]
 
@@ -44,16 +44,16 @@ model Farm {
 
 model Pivot {
   id          String    @id @default(uuid())
-  farmId      String
+  farmId      String    @map("farm_id")
   name        String
   latitude    Float
   longitude   Float
   status      Json
-  bladeAt100  Float
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  bladeAt100  Float     @map("blade_at_100")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  farm        Farm      @relation(fields: [farmId], references: [id])
+  farm        Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
   states      State[]
 
   @@index([farmId])
@@ -62,13 +62,13 @@ model Pivot {
 
 model State {
   id            String    @id @default(uuid())
-  pivotId       String
+  pivotId       String    @map("pivot_id")
   timestamp     DateTime
-  isOn          Boolean
+  isOn          Boolean   @map("is_on")
   direction     String
-  isIrrigating  Boolean
+  isIrrigating  Boolean   @map("is_irrigating")
   
-  pivot         Pivot     @relation(fields: [pivotId], references: [id])
+  pivot         Pivot     @relation(fields: [pivotId], references: [id], onDelete: Cascade)
   cycles        Cycle[]
 
   @@index([pivotId])
@@ -77,12 +77,12 @@ model State {
 
 model Cycle {
   id            String    @id @default(uuid())
-  stateId       String
+  stateId       String    @map("state_id")
   timestamp     DateTime
   angle         Float
   percentimeter Float
 
-  state         State     @relation(fields: [stateId], references: [id])
+  state         State     @relation(fields: [stateId], references: [id], onDelete: Cascade)
 
   @@index([stateId])
   @@map("cycles")
