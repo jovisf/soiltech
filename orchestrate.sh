@@ -212,15 +212,15 @@ extract_task() {
 
   mkdir -p "$AGENTS_DIR/handoffs/$task_id"
 
-  # Extract the task block from PRD (from ## TASK-N to next ## TASK- or EOF)
-  awk "/^## $task_id:/,/^## TASK-[0-9]/" "$PRD_FILE" \
-    | head -n -1 \
+  # Extract the task block from PRD
+  # Logic: Start printing at the task header, stop at the next task header.
+  # We use a stateful awk script to avoid range-matching issues.
+  awk "/^## $task_id:/{p=1;print;next} /^## TASK-[0-9]/{p=0} p" "$PRD_FILE" \
     > "$output_file" 2>/dev/null || true
 
-  # Fallback: try without trailing colon
+  # Fallback: try without trailing colon in the match
   if [[ ! -s "$output_file" ]]; then
-    awk "/^## $task_id[^-]/,/^## TASK-[0-9]/" "$PRD_FILE" \
-      | head -n -1 \
+    awk "/^## $task_id[^-]/{p=1;print;next} /^## TASK-[0-9]/{p=0} p" "$PRD_FILE" \
       > "$output_file" 2>/dev/null || true
   fi
 
