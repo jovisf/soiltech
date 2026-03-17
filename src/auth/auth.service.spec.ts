@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { PrismaService } from '@/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import {
   MockPrismaService,
@@ -11,6 +11,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '@/users/users.service';
+import { Role } from '@prisma/client';
 
 // Mock the bcrypt.compare function
 jest.mock('bcrypt', () => ({
@@ -175,7 +176,7 @@ describe('AuthService', () => {
       id: 'user-id',
       email: 'test@example.com',
       name: 'Test User',
-      role: 'OPERATOR' as any,
+      role: Role.OPERATOR,
     };
 
     // Happy path

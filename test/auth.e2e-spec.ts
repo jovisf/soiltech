@@ -3,7 +3,7 @@ import request from 'supertest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '@/prisma/prisma.service';
-import { CreateUserDto } from '@/auth/dto/create-user.dto';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { Role } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 

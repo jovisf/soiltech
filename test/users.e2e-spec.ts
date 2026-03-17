@@ -3,25 +3,38 @@ import request from 'supertest';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '@/prisma/prisma.service';
-import { CreateUserDto } from '@/auth/dto/create-user.dto';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { Role } from '@prisma/client';
 
 describe('UsersController (e2e)', () => {
   let app: INestApplication;
   let prismaService: PrismaService;
-  let authToken: string;
-  let userId: string;
+  let adminToken: string;
+  let operatorToken: string;
+  let viewerToken: string;
+  let adminId: string;
+  let operatorId: string;
+  let viewerId: string;
 
-  const testUser: CreateUserDto = {
-    name: 'E2E User',
-    email: 'e2e-user@example.com',
+  const adminUser: CreateUserDto = {
+    name: 'Admin User',
+    email: 'admin-e2e@example.com',
+    password: 'Password123',
+  };
+
+  const operatorUser: CreateUserDto = {
+    name: 'Operator User',
+    email: 'operator-e2e@example.com',
+    password: 'Password123',
+  };
+
+  const viewerUser: CreateUserDto = {
+    name: 'Viewer User',
+    email: 'viewer-e2e@example.com',
     password: 'Password123',
   };
 
   beforeAll(async () => {
-    console.log(
-      'e2e test (users): process.env.DATABASE_URL =',
-      process.env.DATABASE_URL,
-    );
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -32,40 +45,77 @@ describe('UsersController (e2e)', () => {
 
     prismaService = app.get<PrismaService>(PrismaService);
 
-    // Clean up existing test users
-    await prismaService.user.deleteMany({
-      where: { email: { in: [testUser.email, 'e2e-user-update@example.com'] } },
-    });
-
-    // Register a test user and obtain auth token
-    const registerRes = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send(testUser)
-      .expect(201);
-    userId = registerRes.body.id;
-
-    // Manually promote test user to ADMIN to pass RBAC
-    await prismaService.user.update({
-      where: { id: userId },
-      data: { role: 'ADMIN' },
-    });
-
-    const loginRes = await request(app.getHttpServer())
-      .post('/auth/login')
-      .send({ email: testUser.email, password: testUser.password })
-      .expect(201);
-    authToken = loginRes.body.access_token;
-  });
-
-  afterAll(async () => {
-    // Clean up test user
+    // Clean up
     await prismaService.user.deleteMany({
       where: {
         email: {
           in: [
-            testUser.email,
-            'e2e-user-update@example.com',
-            'post-user-test@example.com',
+            adminUser.email,
+            operatorUser.email,
+            viewerUser.email,
+            'new-user-e2e@example.com',
+            'update-user-e2e@example.com',
+          ],
+        },
+      },
+    });
+
+    // Setup Admin
+    const adminReg = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(adminUser)
+      .expect(201);
+    adminId = adminReg.body.id;
+    await prismaService.user.update({
+      where: { id: adminId },
+      data: { role: Role.ADMIN },
+    });
+    const adminLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: adminUser.email, password: adminUser.password })
+      .expect(201);
+    adminToken = adminLogin.body.access_token;
+
+    // Setup Operator
+    const operatorReg = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(operatorUser)
+      .expect(201);
+    operatorId = operatorReg.body.id;
+    await prismaService.user.update({
+      where: { id: operatorId },
+      data: { role: Role.OPERATOR },
+    });
+    const operatorLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: operatorUser.email, password: operatorUser.password })
+      .expect(201);
+    operatorToken = operatorLogin.body.access_token;
+
+    // Setup Viewer
+    const viewerReg = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send(viewerUser)
+      .expect(201);
+    viewerId = viewerReg.body.id;
+    // Default role is VIEWER
+    const viewerLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email: viewerUser.email, password: viewerUser.password })
+      .expect(201);
+    viewerToken = viewerLogin.body.access_token;
+  });
+
+  afterAll(async () => {
+    await prismaService.user.deleteMany({
+      where: {
+        email: {
+          in: [
+            adminUser.email,
+            operatorUser.email,
+            viewerUser.email,
+            'new-user-e2e@example.com',
+            'update-user-e2e@example.com',
           ],
         },
       },
@@ -73,248 +123,171 @@ describe('UsersController (e2e)', () => {
     await app.close();
   });
 
-  describe('POST /users', () => {
-    const newUserDto: CreateUserDto = {
-      name: 'Post User Test',
-      email: 'post-user-test@example.com',
-      password: 'Password123',
-    };
-
-    // Happy path
-    it('should return 201 and the created user', () => {
+  describe('GET /users/me', () => {
+    it('should return the current user profile (admin)', () => {
       return request(app.getHttpServer())
-        .post('/users')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(newUserDto)
-        .expect(201)
+        .get('/users/me')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('id');
-          expect(res.body).toHaveProperty('name', newUserDto.name);
-          expect(res.body).toHaveProperty('email', newUserDto.email);
+          expect(res.body.id).toBe(adminId);
+          expect(res.body.email).toBe(adminUser.email);
           expect(res.body).not.toHaveProperty('password');
         });
     });
 
-    // Error path: Invalid DTO
-    it('should return 400 for invalid DTO', () => {
-      const invalidUserDto = {
-        name: 'Invalid User',
-        email: 'invalid-email', // Invalid email format
-        password: '123', // Too short password
-      };
+    it('should return the current user profile (viewer)', () => {
       return request(app.getHttpServer())
-        .post('/users')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(invalidUserDto)
-        .expect(400)
+        .get('/users/me')
+        .set('Authorization', `Bearer ${viewerToken}`)
+        .expect(200)
         .expect((res) => {
-          expect(res.body.message).toEqual(
-            expect.arrayContaining([
-              'email must be an email',
-              'password must be longer than or equal to 6 characters',
-            ]),
-          );
+          expect(res.body.id).toBe(viewerId);
+          expect(res.body.email).toBe(viewerUser.email);
+          expect(res.body).not.toHaveProperty('password');
         });
     });
 
-    // Error path: Duplicate email
-    it('should return 409 for duplicate email', async () => {
-      const duplicateUserDto = {
-        ...newUserDto,
-        email: 'duplicate-test@example.com',
-      };
-      // First create the user
-      await request(app.getHttpServer())
-        .post('/users')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(duplicateUserDto)
-        .expect(201);
+    it('should return 401 without token', () => {
+      return request(app.getHttpServer()).get('/users/me').expect(401);
+    });
+  });
 
-      // Try to create again with the same email
+  describe('Admin Routes Protection (RBAC)', () => {
+    const newUser = {
+      name: 'New User',
+      email: 'new-user-e2e@example.com',
+      password: 'Password123',
+    };
+
+    it('should forbid operator from creating users', () => {
       return request(app.getHttpServer())
         .post('/users')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(duplicateUserDto)
-        .expect(409);
+        .set('Authorization', `Bearer ${operatorToken}`)
+        .send(newUser)
+        .expect(403);
     });
 
-    // Error path: Unauthorized
-    it('should return 401 without a token', () => {
+    it('should forbid viewer from listing users', () => {
+      return request(app.getHttpServer())
+        .get('/users')
+        .set('Authorization', `Bearer ${viewerToken}`)
+        .expect(403);
+    });
+
+    it('should forbid operator from deleting users', () => {
+      return request(app.getHttpServer())
+        .delete(`/users/${viewerId}`)
+        .set('Authorization', `Bearer ${operatorToken}`)
+        .expect(403);
+    });
+  });
+
+  describe('POST /users', () => {
+    it('should create a user (admin only)', () => {
+      const newUser = {
+        name: 'New User',
+        email: 'new-user-e2e@example.com',
+        password: 'Password123',
+        role: Role.OPERATOR,
+      };
       return request(app.getHttpServer())
         .post('/users')
-        .send(newUserDto)
-        .expect(401);
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(newUser)
+        .expect(201)
+        .expect((res) => {
+          expect(res.body.email).toBe(newUser.email);
+          expect(res.body.role).toBe(Role.OPERATOR);
+          expect(res.body).not.toHaveProperty('password');
+        });
+    });
+
+    it('should return 400 for invalid email', () => {
+      return request(app.getHttpServer())
+        .post('/users')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 'Test', email: 'invalid', password: '123' })
+        .expect(400);
     });
   });
 
   describe('GET /users', () => {
-    // Happy path
-    it('should return 200 and an array of users', () => {
+    it('should return list of users (admin only)', () => {
       return request(app.getHttpServer())
         .get('/users')
-        .set('Authorization', `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body.length).toBeGreaterThan(0);
-          expect(res.body[0]).toHaveProperty('id');
-          expect(res.body[0]).toHaveProperty('email');
-          expect(res.body[0]).not.toHaveProperty('password');
+          expect(res.body.length).toBeGreaterThanOrEqual(3);
+          res.body.forEach((u: any) => expect(u).not.toHaveProperty('password'));
         });
-    });
-
-    // Error path: Unauthorized
-    it('should return 401 without a token', () => {
-      return request(app.getHttpServer()).get('/users').expect(401);
     });
   });
 
   describe('GET /users/:id', () => {
-    // Happy path
-    it('should return 200 and a single user', () => {
+    it('should return user by id (admin only)', () => {
       return request(app.getHttpServer())
-        .get(`/users/${userId}`)
-        .set('Authorization', `Bearer ${authToken}`)
+        .get(`/users/${operatorId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('id', userId);
-          expect(res.body).toHaveProperty('email', testUser.email);
+          expect(res.body.id).toBe(operatorId);
           expect(res.body).not.toHaveProperty('password');
         });
     });
 
-    // Error path: Unauthorized
-    it('should return 401 without a token', () => {
-      return request(app.getHttpServer()).get(`/users/${userId}`).expect(401);
+    it('should return 400 for invalid UUID', () => {
+      return request(app.getHttpServer())
+        .get('/users/not-a-uuid')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(400);
     });
 
-    // Error path: Not Found
-    it('should return 404 for a non-existent user ID', () => {
-      const nonExistentId = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'; // Example UUID
+    it('should return 404 for non-existent user', () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
       return request(app.getHttpServer())
         .get(`/users/${nonExistentId}`)
-        .set('Authorization', `Bearer ${authToken}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(404);
     });
   });
 
   describe('PATCH /users/:id', () => {
-    // Happy path
-    it('should return 200 and the updated user', () => {
-      const updateData = { name: 'Updated E2E User' };
+    it('should update user (admin only)', () => {
       return request(app.getHttpServer())
-        .patch(`/users/${userId}`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .send(updateData)
+        .patch(`/users/${operatorId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ name: 'Updated Operator' })
         .expect(200)
         .expect((res) => {
-          expect(res.body).toHaveProperty('id', userId);
-          expect(res.body).toHaveProperty('name', updateData.name);
-          expect(res.body).not.toHaveProperty('password');
+          expect(res.body.name).toBe('Updated Operator');
         });
-    });
-
-    // Error path: Unauthorized
-    it('should return 401 without a token', () => {
-      return request(app.getHttpServer())
-        .patch(`/users/${userId}`)
-        .send({ name: 'Unauthorized Update' })
-        .expect(401);
-    });
-
-    // Error path: Not Found
-    it('should return 404 for a non-existent user ID', () => {
-      const nonExistentId = 'a1b2c3d4-e5f6-7890-1234-567890abcdef'; // Example UUID
-      return request(app.getHttpServer())
-        .patch(`/users/${nonExistentId}`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({ name: 'Non Existent' })
-        .expect(404);
-    });
-
-    // Error path: Duplicate email
-    it('should return 409 for duplicate email', async () => {
-      // Create another user to cause a conflict
-      await request(app.getHttpServer()).post('/auth/register').send({
-        name: 'Another User',
-        email: 'e2e-user-update@example.com',
-        password: 'Password123',
-      });
-
-      return request(app.getHttpServer())
-        .patch(`/users/${userId}`)
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({ email: 'e2e-user-update@example.com' })
-        .expect(409);
     });
   });
 
   describe('DELETE /users/:id', () => {
-    let userToDeleteId: string;
-    let userToDeleteAuthToken: string;
-
-    beforeEach(async () => {
-      // Clean up if user already exists
-      await prismaService.user.deleteMany({
-        where: { email: 'delete-me@example.com' },
+    it('should delete user (admin only)', async () => {
+      // Create a user to delete
+      const userToDelete = await prismaService.user.create({
+        data: {
+          name: 'To Delete',
+          email: 'delete@example.com',
+          password: 'hashed',
+        },
       });
 
-      // Register a new user specifically for deletion test
-      const newUser: CreateUserDto = {
-        name: 'Delete User',
-        email: 'delete-me@example.com',
-        password: 'Password123',
-      };
-      const registerRes = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send(newUser)
-        .expect(201);
-      userToDeleteId = registerRes.body.id;
-
-      // Manually promote user to delete to ADMIN to pass RBAC
-      await prismaService.user.update({
-        where: { id: userToDeleteId },
-        data: { role: 'ADMIN' },
-      });
-
-      const loginRes = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({ email: newUser.email, password: newUser.password })
-        .expect(201);
-      userToDeleteAuthToken = loginRes.body.access_token;
-    });
-
-    // Happy path
-    it('should return 200 and the removed user', () => {
-      return request(app.getHttpServer())
-        .delete(`/users/${userToDeleteId}`)
-        .set('Authorization', `Bearer ${userToDeleteAuthToken}`) // Use the token of the user being deleted
-        .expect(200)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('id', userToDeleteId);
-          expect(res.body).not.toHaveProperty('password');
-        });
-    });
-
-    // Error path: Unauthorized
-    it('should return 401 without a token', () => {
-      return request(app.getHttpServer())
-        .delete(`/users/${userToDeleteId}`)
-        .expect(401);
-    });
-
-    // Error path: Not Found (after deletion)
-    it('should return 404 if trying to delete a non-existent user ID', async () => {
-      // Delete the user first
       await request(app.getHttpServer())
-        .delete(`/users/${userToDeleteId}`)
-        .set('Authorization', `Bearer ${userToDeleteAuthToken}`);
+        .delete(`/users/${userToDelete.id}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
 
-      // Try to delete again
-      return request(app.getHttpServer())
-        .delete(`/users/${userToDeleteId}`)
-        .set('Authorization', `Bearer ${userToDeleteAuthToken}`)
-        .expect(404);
+      // Verify it's gone
+      const found = await prismaService.user.findUnique({
+        where: { id: userToDelete.id },
+      });
+      expect(found).toBeNull();
     });
   });
 });

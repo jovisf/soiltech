@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Role } from '@prisma/client';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -78,7 +79,7 @@ describe('AuthController', () => {
       id: 'uuid-1',
       email: 'test@example.com',
       name: 'Test User',
-      role: 'OPERATOR' as any,
+      role: Role.OPERATOR,
     };
     const loginResponse = { access_token: 'mock-jwt-token' };
 
