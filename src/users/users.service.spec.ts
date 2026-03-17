@@ -68,7 +68,9 @@ describe('UsersService', () => {
       expect(prismaService.user.create).toHaveBeenCalledWith({
         data: { ...createUserDto, password: 'hashed_password123' },
       });
-      expect(result).toEqual(createdUser);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...expectedUser } = createdUser;
+      expect(result).toEqual(expectedUser);
     });
 
     // Error path: Duplicate email
@@ -110,7 +112,8 @@ describe('UsersService', () => {
       const result = await service.findAll();
 
       expect(prismaService.user.findMany).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(users);
+      const expectedUsers = users.map(({ password, ...rest }) => rest);
+      expect(result).toEqual(expectedUsers);
     });
 
     // Edge case: Return empty array
@@ -142,7 +145,9 @@ describe('UsersService', () => {
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
       });
-      expect(result).toEqual(user);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...expectedUser } = user;
+      expect(result).toEqual(expectedUser);
     });
 
     // Error path: User not found
@@ -175,7 +180,9 @@ describe('UsersService', () => {
         where: { id: userId },
         data: updateUserDto,
       });
-      expect(result).toEqual(updatedUser);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...expectedUser } = updatedUser;
+      expect(result).toEqual(expectedUser);
     });
 
     // Happy path: Update password
@@ -196,7 +203,9 @@ describe('UsersService', () => {
         where: { id: userId },
         data: { password: 'hashed_newPassword123' },
       });
-      expect(result).toEqual(updatedUserWithNewPassword);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...expectedUser } = updatedUserWithNewPassword;
+      expect(result).toEqual(expectedUser);
     });
 
     // Error path: User not found
@@ -248,7 +257,9 @@ describe('UsersService', () => {
       expect(prismaService.user.delete).toHaveBeenCalledWith({
         where: { id: userId },
       });
-      expect(result).toEqual(removedUser);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...expectedUser } = removedUser;
+      expect(result).toEqual(expectedUser);
     });
 
     // Error path: User not found
