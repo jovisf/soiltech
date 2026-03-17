@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "resolvePackageJsonExports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@/common/*": ["src/common/*"],
+      "@/auth/*": ["src/auth/*"],
+      "@/users/*": ["src/users/*"],
+      "@/farms/*": ["src/farms/*"],
+      "@/pivots/*": ["src/pivots/*"],
+      "@/states/*": ["src/states/*"],
+      "@/cycles/*": ["src/cycles/*"],
+      "@/mqtt/*": ["src/mqtt/*"],
+      "@/websocket/*": ["src/websocket/*"],
+      "@/weather/*": ["src/weather/*"],
+      "@/prisma/*": ["src/prisma/*"],
+      "@/config/*": ["src/config/*"]
+    }
+  }
+}
