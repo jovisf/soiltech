@@ -10,6 +10,7 @@ import { FarmsModule } from '@/farms/farms.module';
 import { PivotsModule } from '@/pivots/pivots.module';
 import { BullModule } from '@nestjs/bullmq';
 import { MqttModule } from '@/mqtt/mqtt.module';
+import { WebsocketModule } from '@/websocket/websocket.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { MqttModule } from '@/mqtt/mqtt.module';
     FarmsModule,
     PivotsModule,
     MqttModule,
+    WebsocketModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
