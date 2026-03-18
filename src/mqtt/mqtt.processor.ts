@@ -4,6 +4,7 @@ import { Logger } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MqttTelemetryService } from './mqtt.telemetry.service';
 import { MQTT_TELEMETRY_QUEUE } from './mqtt.constants';
+import { WebsocketGateway } from '@/websocket/websocket.gateway';
 
 interface TelemetryJob {
   pivotId: string;
@@ -18,6 +19,7 @@ export class MqttProcessor extends WorkerHost {
   constructor(
     private readonly prisma: PrismaService,
     private readonly telemetryService: MqttTelemetryService,
+    private readonly websocketGateway: WebsocketGateway,
   ) {
     super();
   }
@@ -52,6 +54,9 @@ export class MqttProcessor extends WorkerHost {
     try {
       // Delegate business logic to TelemetryService (SRP)
       await this.telemetryService.processTelemetry(pivotId, parsed, timestamp);
+
+      // Emit live update via WebSocket (TASK-9)
+      this.websocketGateway.emitPivotUpdate(pivotId, parsed);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(

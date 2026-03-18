@@ -4,6 +4,7 @@ import { Job } from 'bullmq';
 import { MqttProcessor } from './mqtt.processor';
 import { PrismaService } from '@/prisma/prisma.service';
 import { MqttTelemetryService } from './mqtt.telemetry.service';
+import { WebsocketGateway } from '@/websocket/websocket.gateway';
 
 describe('MqttProcessor', () => {
   let processor: MqttProcessor;
@@ -14,6 +15,9 @@ describe('MqttProcessor', () => {
   };
   let telemetryService: {
     processTelemetry: jest.Mock;
+  };
+  let websocketGateway: {
+    emitPivotUpdate: jest.Mock;
   };
 
   beforeEach(async () => {
@@ -27,11 +31,16 @@ describe('MqttProcessor', () => {
       processTelemetry: jest.fn(),
     };
 
+    websocketGateway = {
+      emitPivotUpdate: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MqttProcessor,
         { provide: PrismaService, useValue: prisma },
         { provide: MqttTelemetryService, useValue: telemetryService },
+        { provide: WebsocketGateway, useValue: websocketGateway },
       ],
     }).compile();
 
@@ -55,7 +64,7 @@ describe('MqttProcessor', () => {
       },
     } as Job;
 
-    it('should successfully process a valid telemetry packet', async () => {
+    it('should successfully process a valid telemetry packet and emit live update', async () => {
       prisma.pivot.count.mockResolvedValue(1);
       telemetryService.processTelemetry.mockResolvedValue(undefined);
 
@@ -68,6 +77,10 @@ describe('MqttProcessor', () => {
         'pivot-123',
         { isOn: true, angle: 90 },
         expect.any(Date),
+      );
+      expect(websocketGateway.emitPivotUpdate).toHaveBeenCalledWith(
+        'pivot-123',
+        { isOn: true, angle: 90 },
       );
     });
 
