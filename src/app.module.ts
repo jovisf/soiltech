@@ -6,9 +6,17 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { FarmsModule } from './farms/farms.module';
+import { PivotsModule } from './pivots/pivots.module';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, AuthModule, UsersModule, FarmsModule],
+  imports: [
+    ConfigModule,
+    PrismaModule,
+    AuthModule,
+    UsersModule,
+    FarmsModule,
+    PivotsModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
