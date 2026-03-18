@@ -16,7 +16,10 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  login(@Body() _loginDto: LoginDto, @Request() req: { user: Omit<User, 'password'> }) {
+  login(
+    @Body() _loginDto: LoginDto,
+    @Request() req: { user: Omit<User, 'password'> },
+  ) {
     return this.authService.login(req.user);
   }
 }

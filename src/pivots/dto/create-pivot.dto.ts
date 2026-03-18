@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsString, IsNumber, IsPositive, Min, Max } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsPositive,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class CreatePivotDto {
   @IsString()

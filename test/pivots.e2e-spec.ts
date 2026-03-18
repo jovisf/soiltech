@@ -37,19 +37,46 @@ describe('Pivots (e2e)', () => {
 
     // Create test users and tokens
     const adminUser = await prisma.user.create({
-      data: { email: 'admin@pivots.com', name: 'Admin', password: 'password', role: Role.ADMIN },
+      data: {
+        email: 'admin@pivots.com',
+        name: 'Admin',
+        password: 'password',
+        role: Role.ADMIN,
+      },
     });
-    adminToken = jwtService.sign({ sub: adminUser.id, email: adminUser.email, role: adminUser.role });
+    adminToken = jwtService.sign({
+      sub: adminUser.id,
+      email: adminUser.email,
+      role: adminUser.role,
+    });
 
     const operatorUser = await prisma.user.create({
-      data: { email: 'operator@pivots.com', name: 'Operator', password: 'password', role: Role.OPERATOR },
+      data: {
+        email: 'operator@pivots.com',
+        name: 'Operator',
+        password: 'password',
+        role: Role.OPERATOR,
+      },
     });
-    operatorToken = jwtService.sign({ sub: operatorUser.id, email: operatorUser.email, role: operatorUser.role });
+    operatorToken = jwtService.sign({
+      sub: operatorUser.id,
+      email: operatorUser.email,
+      role: operatorUser.role,
+    });
 
     const viewerUser = await prisma.user.create({
-      data: { email: 'viewer@pivots.com', name: 'Viewer', password: 'password', role: Role.VIEWER },
+      data: {
+        email: 'viewer@pivots.com',
+        name: 'Viewer',
+        password: 'password',
+        role: Role.VIEWER,
+      },
     });
-    viewerToken = jwtService.sign({ sub: viewerUser.id, email: viewerUser.email, role: viewerUser.role });
+    viewerToken = jwtService.sign({
+      sub: viewerUser.id,
+      email: viewerUser.email,
+      role: viewerUser.role,
+    });
 
     // Create a farm for testing pivots
     const farm = await prisma.farm.create({

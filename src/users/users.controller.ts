@@ -36,7 +36,8 @@ export class UsersController {
   }
 
   @Get('me')
-  getMe(@Request() req: any) { // reason: req.user is dynamically added by Passport
+  getMe(@Request() req: any) {
+    // reason: req.user is dynamically added by Passport
     return this.usersService.findOne(req.user.id);
   }
 

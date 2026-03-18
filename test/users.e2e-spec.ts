@@ -221,7 +221,9 @@ describe('UsersController (e2e)', () => {
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
           expect(res.body.length).toBeGreaterThanOrEqual(3);
-          res.body.forEach((u: any) => expect(u).not.toHaveProperty('password'));
+          res.body.forEach((u: any) =>
+            expect(u).not.toHaveProperty('password'),
+          );
         });
     });
   });

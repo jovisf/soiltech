@@ -37,7 +37,9 @@ describe('MqttService', () => {
     };
 
     (mqtt.connect as jest.Mock).mockReturnValue(mockClient);
-    (fs.readFileSync as jest.Mock).mockReturnValue(Buffer.from('mock-file-content'));
+    (fs.readFileSync as jest.Mock).mockReturnValue(
+      Buffer.from('mock-file-content'),
+    );
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -71,28 +73,46 @@ describe('MqttService', () => {
 
       service.onModuleInit();
 
-      expect(mqtt.connect).toHaveBeenCalledWith('mqtts://mock-endpoint', expect.any(Object));
+      expect(mqtt.connect).toHaveBeenCalledWith(
+        'mqtts://mock-endpoint',
+        expect.any(Object),
+      );
       expect(fs.readFileSync).toHaveBeenCalledTimes(3);
-      expect(mockClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
+      expect(mockClient.on).toHaveBeenCalledWith(
+        'connect',
+        expect.any(Function),
+      );
       expect(mockClient.on).toHaveBeenCalledWith('error', expect.any(Function));
-      expect(mockClient.on).toHaveBeenCalledWith('message', expect.any(Function));
-      expect(mockClient.subscribe).toHaveBeenCalledWith('soiltech/pivots/+/telemetry', expect.any(Function));
+      expect(mockClient.on).toHaveBeenCalledWith(
+        'message',
+        expect.any(Function),
+      );
+      expect(mockClient.subscribe).toHaveBeenCalledWith(
+        'soiltech/pivots/+/telemetry',
+        expect.any(Function),
+      );
     });
 
     it('should log error if connection fails', () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
       (mqtt.connect as jest.Mock).mockImplementation(() => {
         throw new Error('Connection failed');
       });
 
       service.onModuleInit();
 
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to initialize MQTT client'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to initialize MQTT client'),
+      );
       loggerSpy.mockRestore();
     });
 
     it('should log error if client emits error', () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
       let errorHandler: Function = () => {};
       mockClient.on.mockImplementation((event: string, callback: Function) => {
         if (event === 'error') errorHandler = callback;
@@ -101,22 +121,32 @@ describe('MqttService', () => {
       service.onModuleInit();
       errorHandler(new Error('MQTT Error'));
 
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('MQTT Connection Error: MQTT Error'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('MQTT Connection Error: MQTT Error'),
+      );
       loggerSpy.mockRestore();
     });
 
     it('should log error if subscription fails', () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
       mockClient.on.mockImplementation((event: string, callback: Function) => {
         if (event === 'connect') callback();
       });
-      mockClient.subscribe.mockImplementation((topic: string, callback: Function) => {
-        callback(new Error('Subscription failed'));
-      });
+      mockClient.subscribe.mockImplementation(
+        (topic: string, callback: Function) => {
+          callback(new Error('Subscription failed'));
+        },
+      );
 
       service.onModuleInit();
 
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to subscribe to soiltech/pivots/+/telemetry: Subscription failed'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Failed to subscribe to soiltech/pivots/+/telemetry: Subscription failed',
+        ),
+      );
       loggerSpy.mockRestore();
     });
   });
@@ -132,7 +162,7 @@ describe('MqttService', () => {
 
       const topic = 'soiltech/pivots/pivot-123/telemetry';
       const payload = Buffer.from(JSON.stringify({ status: 'running' }));
-      
+
       await messageHandler(topic, payload);
 
       expect(queue.add).toHaveBeenCalledWith(PROCESS_TELEMETRY_JOB, {
@@ -143,14 +173,16 @@ describe('MqttService', () => {
     });
 
     it('should log error if enqueue fails (uncaught rejection handler)', async () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
-      // We need to mock enqueue to throw, but it's private. 
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
+      // We need to mock enqueue to throw, but it's private.
       // queue.add failing will cause enqueue to throw its own error and log it.
       // To trigger the .catch in the event listener, we can mock something in the try block of enqueue to throw.
-      
+
       // Let's actually just test the catch block by making queue.add throw a generic error that isn't an Error instance maybe?
       // Actually, if we want to hit line 57, we need enqueue to throw an error that is NOT caught by its own try-catch.
-      // But enqueue catches everything! 
+      // But enqueue catches everything!
       /*
       private async enqueue(topic: string, payload: Buffer) {
         try { ... } catch (error) { ... }
@@ -172,16 +204,21 @@ describe('MqttService', () => {
 
       const topic = 'v1/soiltech/pivots/pivot-456/telemetry';
       const payload = Buffer.from('data');
-      
+
       await messageHandler(topic, payload);
 
-      expect(queue.add).toHaveBeenCalledWith(PROCESS_TELEMETRY_JOB, expect.objectContaining({
-        pivotId: 'pivot-456',
-      }));
+      expect(queue.add).toHaveBeenCalledWith(
+        PROCESS_TELEMETRY_JOB,
+        expect.objectContaining({
+          pivotId: 'pivot-456',
+        }),
+      );
     });
 
     it('should log warning if pivotId cannot be extracted', async () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation();
       let messageHandler: Function = () => {};
       mockClient.on.mockImplementation((event: string, callback: Function) => {
         if (event === 'message') messageHandler = callback;
@@ -192,13 +229,17 @@ describe('MqttService', () => {
       const topic = 'soiltech/pivots'; // Not enough parts
       await messageHandler(topic, Buffer.from('data'));
 
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Could not extract pivotId'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Could not extract pivotId'),
+      );
       expect(queue.add).not.toHaveBeenCalled();
       loggerSpy.mockRestore();
     });
 
     it('should log error if enqueuing fails', async () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
       queue.add.mockRejectedValue(new Error('Queue error'));
       let messageHandler: Function = () => {};
       mockClient.on.mockImplementation((event: string, callback: Function) => {
@@ -211,7 +252,9 @@ describe('MqttService', () => {
       await messageHandler(topic, Buffer.from('data'));
 
       // The enqueue call is wrapped in .catch() which logs the error
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to enqueue MQTT message: Queue error'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to enqueue MQTT message: Queue error'),
+      );
       loggerSpy.mockRestore();
     });
   });
@@ -225,13 +268,17 @@ describe('MqttService', () => {
     });
 
     it('should handle disconnect errors gracefully', async () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
       mockClient.endAsync.mockRejectedValue(new Error('Disconnect failed'));
-      
+
       service.onModuleInit();
       await service.onModuleDestroy();
 
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Error while disconnecting MQTT client'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Error while disconnecting MQTT client'),
+      );
       loggerSpy.mockRestore();
     });
   });

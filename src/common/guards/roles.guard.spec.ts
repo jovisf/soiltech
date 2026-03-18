@@ -53,7 +53,9 @@ describe('RolesGuard', () => {
     });
 
     it('should return true if user has the required role', () => {
-      jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.OPERATOR]);
+      jest
+        .spyOn(reflector, 'getAllAndOverride')
+        .mockReturnValue([Role.OPERATOR]);
 
       const result = guard.canActivate(mockContext as ExecutionContext);
 

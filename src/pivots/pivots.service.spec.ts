@@ -21,22 +21,19 @@ describe('PivotsService', () => {
   beforeEach(async () => {
     prisma = {
       farm: {
-        findUnique: jest.Mock = jest.fn(),
+        findUnique: (jest.Mock = jest.fn()),
       },
       pivot: {
-        create: jest.Mock = jest.fn(),
-        findMany: jest.Mock = jest.fn(),
-        findUnique: jest.Mock = jest.fn(),
-        update: jest.Mock = jest.fn(),
-        delete: jest.Mock = jest.fn(),
+        create: (jest.Mock = jest.fn()),
+        findMany: (jest.Mock = jest.fn()),
+        findUnique: (jest.Mock = jest.fn()),
+        update: (jest.Mock = jest.fn()),
+        delete: (jest.Mock = jest.fn()),
       },
     } as any;
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PivotsService,
-        { provide: PrismaService, useValue: prisma },
-      ],
+      providers: [PivotsService, { provide: PrismaService, useValue: prisma }],
     }).compile();
 
     service = module.get<PivotsService>(PivotsService);
@@ -53,13 +50,20 @@ describe('PivotsService', () => {
 
     it('should create a pivot when farm exists', async () => {
       prisma.farm.findUnique.mockResolvedValue({ id: farmId });
-      prisma.pivot.create.mockResolvedValue({ id: 'pivot-id', ...dto, farmId, status: {} });
+      prisma.pivot.create.mockResolvedValue({
+        id: 'pivot-id',
+        ...dto,
+        farmId,
+        status: {},
+      });
 
       const result = await service.create(farmId, dto);
 
       expect(result).toBeDefined();
       expect(result.name).toBe(dto.name);
-      expect(prisma.farm.findUnique).toHaveBeenCalledWith({ where: { id: farmId } });
+      expect(prisma.farm.findUnique).toHaveBeenCalledWith({
+        where: { id: farmId },
+      });
       expect(prisma.pivot.create).toHaveBeenCalledWith({
         data: { ...dto, farmId, status: {} },
       });
@@ -68,13 +72,20 @@ describe('PivotsService', () => {
     it('should throw NotFoundException when farm does not exist', async () => {
       prisma.farm.findUnique.mockResolvedValue(null);
 
-      await expect(service.create(farmId, dto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(farmId, dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should handle coordinates at boundary values', async () => {
       const edgeDto = { ...dto, latitude: 90, longitude: 180 };
       prisma.farm.findUnique.mockResolvedValue({ id: farmId });
-      prisma.pivot.create.mockResolvedValue({ id: 'pivot-id', ...edgeDto, farmId, status: {} });
+      prisma.pivot.create.mockResolvedValue({
+        id: 'pivot-id',
+        ...edgeDto,
+        farmId,
+        status: {},
+      });
 
       const result = await service.create(farmId, edgeDto);
 
@@ -88,7 +99,10 @@ describe('PivotsService', () => {
 
     it('should return pivots for a valid farm', async () => {
       prisma.farm.findUnique.mockResolvedValue({ id: farmId });
-      const pivots = [{ id: '1', name: 'P1' }, { id: '2', name: 'P2' }];
+      const pivots = [
+        { id: '1', name: 'P1' },
+        { id: '2', name: 'P2' },
+      ];
       prisma.pivot.findMany.mockResolvedValue(pivots);
 
       const result = await service.findAllByFarm(farmId);
@@ -100,7 +114,9 @@ describe('PivotsService', () => {
     it('should throw NotFoundException when farm does not exist', async () => {
       prisma.farm.findUnique.mockResolvedValue(null);
 
-      await expect(service.findAllByFarm(farmId)).rejects.toThrow(NotFoundException);
+      await expect(service.findAllByFarm(farmId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -114,7 +130,9 @@ describe('PivotsService', () => {
       const result = await service.findOne(pivotId);
 
       expect(result).toEqual(pivot);
-      expect(prisma.pivot.findUnique).toHaveBeenCalledWith({ where: { id: pivotId } });
+      expect(prisma.pivot.findUnique).toHaveBeenCalledWith({
+        where: { id: pivotId },
+      });
     });
 
     it('should throw NotFoundException when pivot not found', async () => {
@@ -144,7 +162,9 @@ describe('PivotsService', () => {
     it('should throw NotFoundException when pivot not found', async () => {
       prisma.pivot.findUnique.mockResolvedValue(null);
 
-      await expect(service.update(pivotId, dto)).rejects.toThrow(NotFoundException);
+      await expect(service.update(pivotId, dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -158,7 +178,9 @@ describe('PivotsService', () => {
       const result = await service.remove(pivotId);
 
       expect(result).toBeDefined();
-      expect(prisma.pivot.delete).toHaveBeenCalledWith({ where: { id: pivotId } });
+      expect(prisma.pivot.delete).toHaveBeenCalledWith({
+        where: { id: pivotId },
+      });
     });
 
     it('should throw NotFoundException when pivot not found', async () => {

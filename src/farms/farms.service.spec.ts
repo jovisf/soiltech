@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { FarmsService } from './farms.service';
 import { PrismaService } from '@/prisma/prisma.service';
-import { createMockPrismaService, MockPrismaService } from 'test/helpers/prisma-mock';
+import {
+  createMockPrismaService,
+  MockPrismaService,
+} from 'test/helpers/prisma-mock';
 import { NotFoundException } from '@nestjs/common';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
@@ -48,7 +51,10 @@ describe('FarmsService', () => {
 
   describe('findAll', () => {
     it('should return all farms', async () => {
-      const farms = [{ id: '1', name: 'Farm 1' }, { id: '2', name: 'Farm 2' }];
+      const farms = [
+        { id: '1', name: 'Farm 1' },
+        { id: '2', name: 'Farm 2' },
+      ];
       prisma.farm.findMany.mockResolvedValue(farms);
 
       const result = await service.findAll();
@@ -100,7 +106,9 @@ describe('FarmsService', () => {
     it('should throw NotFoundException if farm to update does not exist', async () => {
       prisma.farm.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('uuid', { name: 'New' })).rejects.toThrow(NotFoundException);
+      await expect(service.update('uuid', { name: 'New' })).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

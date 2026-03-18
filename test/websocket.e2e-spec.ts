@@ -113,7 +113,7 @@ describe('WebsocketGateway (e2e)', () => {
     let received = false;
 
     socket.emit('subscribeToPivot', { pivotId: otherPivotId });
-    
+
     socket.on('pivotStatusUpdate', (data) => {
       if (data.pivotId === pivotId) {
         received = true;
@@ -121,7 +121,7 @@ describe('WebsocketGateway (e2e)', () => {
     });
 
     gateway.emitPivotUpdate(pivotId, { isOn: false });
-    
+
     setTimeout(() => {
       expect(received).toBe(false);
       done();

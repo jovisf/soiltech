@@ -13,7 +13,13 @@ jest.mock('fs', () => {
   return {
     ...actualFs,
     readFileSync: jest.fn((path, options) => {
-      if (typeof path === 'string' && (path.includes('certs') || path.endsWith('.pem') || path.endsWith('.crt') || path.endsWith('.key'))) {
+      if (
+        typeof path === 'string' &&
+        (path.includes('certs') ||
+          path.endsWith('.pem') ||
+          path.endsWith('.crt') ||
+          path.endsWith('.key'))
+      ) {
         return Buffer.from('mock-content');
       }
       return actualFs.readFileSync(path, options);
@@ -71,12 +77,12 @@ describe('Mqtt (e2e)', () => {
     // 2. Simulate a message
     const topic = 'soiltech/pivots/pivot-999/telemetry';
     const payload = Buffer.from(JSON.stringify({ battery: 85, signal: -65 }));
-    
-    // We need to wait for the async enqueue process. 
-    // Since enqueue is private and not awaited by the event listener, 
+
+    // We need to wait for the async enqueue process.
+    // Since enqueue is private and not awaited by the event listener,
     // we can check the queue after a small delay or by spying on queue.add
     const queueSpy = jest.spyOn(queue, 'add');
-    
+
     await messageHandler(topic, payload);
 
     expect(queueSpy).toHaveBeenCalledWith(
@@ -84,9 +90,9 @@ describe('Mqtt (e2e)', () => {
       expect.objectContaining({
         pivotId: 'pivot-999',
         rawPayload: payload.toString('utf-8'),
-      })
+      }),
     );
-    
+
     queueSpy.mockRestore();
   });
 });

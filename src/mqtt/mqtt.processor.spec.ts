@@ -85,7 +85,9 @@ describe('MqttProcessor', () => {
     });
 
     it('should discard malformed JSON packets and log an error', async () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
       const malformedJob = {
         data: {
           pivotId: 'pivot-123',
@@ -96,36 +98,46 @@ describe('MqttProcessor', () => {
 
       await processor.process(malformedJob);
 
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Malformed packet'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Malformed packet'),
+      );
       expect(prisma.pivot.count).not.toHaveBeenCalled();
       expect(telemetryService.processTelemetry).not.toHaveBeenCalled();
-      
+
       loggerSpy.mockRestore();
     });
 
     it('should discard packets for non-existent pivots and log a warning', async () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'warn')
+        .mockImplementation();
       prisma.pivot.count.mockResolvedValue(0);
 
       await processor.process(mockJob);
 
       expect(prisma.pivot.count).toHaveBeenCalled();
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Discarding packet for non-existent pivot'));
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Discarding packet for non-existent pivot'),
+      );
       expect(telemetryService.processTelemetry).not.toHaveBeenCalled();
-      
+
       loggerSpy.mockRestore();
     });
 
     it('should log error and re-throw if telemetryService fails', async () => {
-      const loggerSpy = jest.spyOn(Logger.prototype, 'error').mockImplementation();
+      const loggerSpy = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation();
       prisma.pivot.count.mockResolvedValue(1);
       const error = new Error('Database connection failed');
       telemetryService.processTelemetry.mockRejectedValue(error);
 
       await expect(processor.process(mockJob)).rejects.toThrow(error);
 
-      expect(loggerSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to process telemetry'));
-      
+      expect(loggerSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to process telemetry'),
+      );
+
       loggerSpy.mockRestore();
     });
 
@@ -150,7 +162,7 @@ describe('MqttProcessor', () => {
         { isOn: true },
         expect.any(Date),
       );
-      
+
       const passedDate = telemetryService.processTelemetry.mock.calls[0][2];
       expect(passedDate.toString()).toBe('Invalid Date');
     });

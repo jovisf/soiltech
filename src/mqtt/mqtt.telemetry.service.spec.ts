@@ -62,10 +62,20 @@ describe('MqttTelemetryService', () => {
     const timestamp = new Date();
 
     it('should create a new active state when none exists (Power On)', async () => {
-      const payload = { isOn: true, direction: 'clockwise', isIrrigating: true, angle: 45, percentimeter: 100 };
-      
+      const payload = {
+        isOn: true,
+        direction: 'clockwise',
+        isIrrigating: true,
+        angle: 45,
+        percentimeter: 100,
+      };
+
       txClient.state.findFirst.mockResolvedValue(null);
-      txClient.state.create.mockResolvedValue({ id: 'state-1', pivotId, isOn: true });
+      txClient.state.create.mockResolvedValue({
+        id: 'state-1',
+        pivotId,
+        isOn: true,
+      });
 
       await service.processTelemetry(pivotId, payload, timestamp);
 
@@ -101,9 +111,20 @@ describe('MqttTelemetryService', () => {
     });
 
     it('should update existing active state metadata and record cycle (Telemetry)', async () => {
-      const payload = { isOn: true, direction: 'counter-clockwise', isIrrigating: true, angle: 90 };
-      const activeState = { id: 'state-1', pivotId, isOn: true, direction: 'clockwise', isIrrigating: false };
-      
+      const payload = {
+        isOn: true,
+        direction: 'counter-clockwise',
+        isIrrigating: true,
+        angle: 90,
+      };
+      const activeState = {
+        id: 'state-1',
+        pivotId,
+        isOn: true,
+        direction: 'clockwise',
+        isIrrigating: false,
+      };
+
       txClient.state.findFirst.mockResolvedValue(activeState);
 
       await service.processTelemetry(pivotId, payload, timestamp);
@@ -201,7 +222,9 @@ describe('MqttTelemetryService', () => {
       const dbError = new Error('Database connection lost');
       txClient.pivot.update.mockRejectedValue(dbError);
 
-      await expect(service.processTelemetry(pivotId, payload, timestamp)).rejects.toThrow(dbError);
+      await expect(
+        service.processTelemetry(pivotId, payload, timestamp),
+      ).rejects.toThrow(dbError);
 
       // WS should not be emitted if DB fails
       expect(wsGateway.emitPivotUpdate).not.toHaveBeenCalled();

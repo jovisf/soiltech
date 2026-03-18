@@ -68,7 +68,9 @@ export class WebsocketGateway
     @MessageBody('pivotId') pivotId: string,
   ) {
     if (!pivotId) {
-      this.logger.warn(`Client ${client.id} tried to subscribe without pivotId`);
+      this.logger.warn(
+        `Client ${client.id} tried to subscribe without pivotId`,
+      );
       return;
     }
     const roomName = this.getRoomName(pivotId);

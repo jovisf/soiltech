@@ -80,7 +80,9 @@ describe('MQTT Worker (e2e)', () => {
     expect(state?.isIrrigating).toBe(true);
 
     // Verify Pivot status updated
-    const updatedPivot1 = await prisma.pivot.findUnique({ where: { id: pivot.id } });
+    const updatedPivot1 = await prisma.pivot.findUnique({
+      where: { id: pivot.id },
+    });
     expect(updatedPivot1?.status).toEqual(JSON.parse(powerOnPayload));
 
     // 3. Telemetry Packet
@@ -121,11 +123,15 @@ describe('MQTT Worker (e2e)', () => {
     } as Job);
 
     // Verify State closed
-    const closedState = await prisma.state.findUnique({ where: { id: state?.id } });
+    const closedState = await prisma.state.findUnique({
+      where: { id: state?.id },
+    });
     expect(closedState?.isOn).toBe(false);
 
     // Verify Pivot status updated
-    const updatedPivot2 = await prisma.pivot.findUnique({ where: { id: pivot.id } });
+    const updatedPivot2 = await prisma.pivot.findUnique({
+      where: { id: pivot.id },
+    });
     expect(updatedPivot2?.status).toEqual(JSON.parse(powerOffPayload));
   });
 

@@ -47,7 +47,7 @@ describe('Auth (e2e)', () => {
         .post('/auth/register')
         .send(testUser)
         .expect(201);
-      
+
       expect(res.body).toHaveProperty('id');
       expect(res.body.email).toBe(testUser.email);
       expect(res.body).not.toHaveProperty('password');
@@ -104,14 +104,14 @@ describe('Auth (e2e)', () => {
     // Note: Global RolesGuard requires user to be present.
     // Since JwtAuthGuard is not global, we expect 403 for routes with @Roles
     // when using the default AppModule configuration.
-    
+
     it('should allow access with valid token', async () => {
       // We use a token for the test user
       const res = await request(app.getHttpServer())
         .get('/users') // This route is NOT protected by @Roles, so global RolesGuard returns true
         .set('Authorization', `Bearer ${authToken}`)
         .expect(200);
-      
+
       expect(Array.isArray(res.body)).toBe(true);
     });
 

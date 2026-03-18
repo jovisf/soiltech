@@ -13,6 +13,7 @@ export function createMockPrismaService(): MockPrismaService {
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
     },
     // Add other models as needed for future tasks
     farm: {
@@ -21,6 +22,7 @@ export function createMockPrismaService(): MockPrismaService {
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
     },
     pivot: {
       create: jest.fn(),
@@ -28,6 +30,7 @@ export function createMockPrismaService(): MockPrismaService {
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
     },
     cycle: {
       create: jest.fn(),
@@ -35,6 +38,7 @@ export function createMockPrismaService(): MockPrismaService {
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
     },
     state: {
       create: jest.fn(),
@@ -42,6 +46,7 @@ export function createMockPrismaService(): MockPrismaService {
       findUnique: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      count: jest.fn(),
     },
   } as unknown as MockPrismaService;
 }
