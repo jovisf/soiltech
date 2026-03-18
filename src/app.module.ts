@@ -12,6 +12,9 @@ import { BullModule } from '@nestjs/bullmq';
 import { MqttModule } from '@/mqtt/mqtt.module';
 import { WebsocketModule } from '@/websocket/websocket.module';
 
+import { StatesModule } from '@/states/states.module';
+import { CyclesModule } from '@/cycles/cycles.module';
+
 @Module({
   imports: [
     ConfigModule,
@@ -20,6 +23,8 @@ import { WebsocketModule } from '@/websocket/websocket.module';
     UsersModule,
     FarmsModule,
     PivotsModule,
+    StatesModule,
+    CyclesModule,
     MqttModule,
     WebsocketModule,
     BullModule.forRootAsync({
