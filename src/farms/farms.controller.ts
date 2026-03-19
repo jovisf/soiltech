@@ -1,10 +1,10 @@
 import {
   Controller,
   Get,
+  Param,
   Post,
   Body,
   Patch,
-  Param,
   Delete,
   UseGuards,
   ParseUUIDPipe,
@@ -16,11 +16,16 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { WeatherService } from '@/weather/weather.service';
+import { WeatherResponseDto } from '@/weather/dto/weather-response.dto';
 
 @Controller('farms')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class FarmsController {
-  constructor(private readonly farmsService: FarmsService) {}
+  constructor(
+    private readonly farmsService: FarmsService,
+    private readonly weatherService: WeatherService,
+  ) {}
 
   @Post()
   @Roles(Role.ADMIN, Role.OPERATOR)
@@ -36,6 +41,17 @@ export class FarmsController {
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.farmsService.findOne(id);
+  }
+
+  @Get(':id/weather')
+  async getWeather(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<WeatherResponseDto> {
+    const farm = await this.farmsService.findOne(id);
+    return this.weatherService.getWeatherByCoordinates(
+      farm.latitude,
+      farm.longitude,
+    );
   }
 
   @Patch(':id')

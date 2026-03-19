@@ -16,11 +16,16 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { WeatherService } from '@/weather/weather.service';
+import { WeatherResponseDto } from '@/weather/dto/weather-response.dto';
 
 @Controller()
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class PivotsController {
-  constructor(private readonly pivotsService: PivotsService) {}
+  constructor(
+    private readonly pivotsService: PivotsService,
+    private readonly weatherService: WeatherService,
+  ) {}
 
   @Post('farms/:farmId/pivots')
   @Roles(Role.ADMIN, Role.OPERATOR)
@@ -39,6 +44,17 @@ export class PivotsController {
   @Get('pivots/:id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.pivotsService.findOne(id);
+  }
+
+  @Get('pivots/:id/weather')
+  async getWeather(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<WeatherResponseDto> {
+    const pivot = await this.pivotsService.findOne(id);
+    return this.weatherService.getWeatherByCoordinates(
+      pivot.latitude,
+      pivot.longitude,
+    );
   }
 
   @Patch('pivots/:id')
