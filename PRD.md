@@ -304,19 +304,19 @@
 
 ## TASK-11: Weather Integration
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-6
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] `WeatherService` fetches forecast from Open-Meteo API by lat/lng
-- [ ] `GET /farms/:id/weather` — returns weather for farm coordinates
-- [ ] `GET /pivots/:id/weather` — returns weather for pivot coordinates
-- [ ] Responses cached in Redis for 30 minutes (configurable via `WEATHER_CACHE_TTL` env var)
-- [ ] Cache key includes coordinates to avoid stale data
-- [ ] Graceful handling: if external API is down, return 503 with message
-- [ ] Response shape includes temperature, humidity, wind speed, conditions
+- [x] `WeatherService` fetches forecast from Open-Meteo API by lat/lng
+- [x] `GET /farms/:id/weather` — returns weather for farm coordinates
+- [x] `GET /pivots/:id/weather` — returns weather for pivot coordinates
+- [x] Responses cached in Redis for 30 minutes (configurable via `WEATHER_CACHE_TTL` env var)
+- [x] Cache key includes coordinates to avoid stale data
+- [x] Graceful handling: if external API is down, return 503 with message
+- [x] Response shape includes temperature, humidity, wind speed, conditions
 
 ### Implementation Protocol
 
@@ -332,19 +332,19 @@
 
 ## TASK-12: Pivot Control Endpoint
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-7
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] `POST /pivots/:id/command` — sends control command to AWS IoT
-- [ ] Payload: `{ action: 'turn_on' | 'turn_off', direction?: 'clockwise' | 'counter-clockwise', withWater?: boolean, percentimeter?: number }`
-- [ ] `percentimeter` validated: integer, range 0–100, only required when `withWater: true`
-- [ ] Command published to MQTT topic: `soiltech/pivots/{pivotId}/command`
-- [ ] Only `ADMIN` and `OPERATOR` roles can send commands
-- [ ] Returns 202 Accepted (fire-and-forget)
-- [ ] 404 if pivot not found
+- [x] `POST /pivots/:id/command` — sends control command to AWS IoT
+- [x] Payload: `{ action: 'turn_on' | 'turn_off', direction?: 'clockwise' | 'counter-clockwise', withWater?: boolean, percentimeter?: number }`
+- [x] `percentimeter` validated: integer, range 0–100, only required when `withWater: true`
+- [x] Command published to MQTT topic: `soiltech/pivots/{pivotId}/command`
+- [x] Only `ADMIN` and `OPERATOR` roles can send commands
+- [x] Returns 202 Accepted (fire-and-forget)
+- [x] 404 if pivot not found
 
 ### Implementation Protocol
 
@@ -389,21 +389,21 @@
 
 ## TASK-14: Dockerization
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-13
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] `Dockerfile` for backend: multi-stage build (build → production)
-- [ ] `docker-compose.yml` with services: `backend`, `postgres`, `redis`
-- [ ] `.env.example` includes all required variables
-- [ ] `.dockerignore` excludes `node_modules`, `.git`, `dist`
-- [ ] Backend service depends on `postgres` and `redis` health checks
-- [ ] PostgreSQL data persisted via named volume
-- [ ] `GET /health` endpoint returns `{ status: 'ok', timestamp }` (no auth required)
-- [ ] Backend runs migrations on startup before accepting connections
-- [ ] `docker compose up -d` brings up the entire stack successfully
+- [x] `Dockerfile` for backend: multi-stage build (build → production)
+- [x] `docker-compose.yml` with services: `backend`, `postgres`, `redis`
+- [x] `.env.example` includes all required variables
+- [x] `.dockerignore` excludes `node_modules`, `.git`, `dist`
+- [x] Backend service depends on `postgres` and `redis` health checks
+- [x] PostgreSQL data persisted via named volume
+- [x] `GET /health` endpoint returns `{ status: 'ok', timestamp }` (no auth required)
+- [x] Backend runs migrations on startup before accepting connections
+- [x] `docker compose up -d` brings up the entire stack successfully
 
 ### Implementation Protocol
 
@@ -419,19 +419,19 @@
 
 ## TASK-15: Traefik Setup
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-14
 **Estimated complexity**: S
 
 ### Acceptance Criteria
 
-- [ ] Traefik service added to `docker-compose.yml`
-- [ ] `api.localhost` routes to backend service
-- [ ] `localhost` routes to frontend placeholder (nginx serving static page)
-- [ ] Traefik dashboard accessible at `traefik.localhost`
-- [ ] Labels-based routing (no static Traefik config files)
-- [ ] HTTPS not required for local development
-- [ ] Frontend placeholder serves a simple "SoilTech Frontend — Coming Soon" page
+- [x] Traefik service added to `docker-compose.yml`
+- [x] `api.localhost` routes to backend service
+- [x] `localhost` routes to frontend placeholder (nginx serving static page)
+- [x] Traefik dashboard accessible at `traefik.localhost`
+- [x] Labels-based routing (no static Traefik config files)
+- [x] HTTPS not required for local development
+- [x] Frontend placeholder serves a simple "SoilTech Frontend — Coming Soon" page
 
 ### Implementation Protocol
 
