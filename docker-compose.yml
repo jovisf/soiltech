@@ -1,14 +1,36 @@
 services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://${POSTGRES_USER:-soiltech}:${POSTGRES_PASSWORD:-soiltech}@postgres:5432/${POSTGRES_DB:-soiltech}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: always
+
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: soiltech
-      POSTGRES_PASSWORD: soiltech
-      POSTGRES_DB: soiltech
+      POSTGRES_USER: ${POSTGRES_USER:-soiltech}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-soiltech}
+      POSTGRES_DB: ${POSTGRES_DB:-soiltech}
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U soiltech"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-soiltech} -d ${POSTGRES_DB:-soiltech}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,3 +44,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+volumes:
+  postgres_data:
