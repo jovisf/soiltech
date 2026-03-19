@@ -3,6 +3,8 @@ import {
   OnModuleInit,
   OnModuleDestroy,
   Logger,
+  ServiceUnavailableException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
@@ -100,6 +102,31 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.error(`Failed to enqueue MQTT message: ${message}`);
     }
+  }
+
+  async publish(
+    topic: string,
+    payload: any, // reason: MQTT payloads are arbitrary JSON structures
+  ): Promise<void> {
+    if (!this.client || !this.client.connected) {
+      throw new ServiceUnavailableException('MQTT client is not connected');
+    }
+
+    return new Promise((resolve, reject) => {
+      this.client.publish(topic, JSON.stringify(payload), { qos: 1 }, (err) => {
+        if (err) {
+          this.logger.error(`Failed to publish to ${topic}: ${err.message}`);
+          reject(
+            new InternalServerErrorException(
+              `Failed to publish MQTT message: ${err.message}`,
+            ),
+          );
+        } else {
+          this.logger.log(`Published command to topic: ${topic}`);
+          resolve();
+        }
+      });
+    });
   }
 
   async onModuleDestroy() {
