@@ -2,6 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { PivotsService } from './pivots.service';
 import { PrismaService } from '@/prisma/prisma.service';
+import { MqttService } from '@/mqtt/mqtt.service';
+import { ConfigService } from '@/config/config.service';
+import { PivotAction } from './dto/pivot-command.dto';
 
 describe('PivotsService', () => {
   let service: PivotsService;
@@ -17,6 +20,8 @@ describe('PivotsService', () => {
       delete: jest.Mock;
     };
   };
+  let mqttService: jest.Mocked<MqttService>;
+  let configService: jest.Mocked<ConfigService>;
 
   beforeEach(async () => {
     prisma = {
@@ -32,11 +37,26 @@ describe('PivotsService', () => {
       },
     } as any;
 
+    const mockMqttService = {
+      publish: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const mockConfigService = {
+      getMqttTopicPrefix: jest.fn().mockReturnValue('soiltech/pivots'),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PivotsService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        PivotsService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: MqttService, useValue: mockMqttService },
+        { provide: ConfigService, useValue: mockConfigService },
+      ],
     }).compile();
 
     service = module.get<PivotsService>(PivotsService);
+    mqttService = module.get(MqttService);
+    configService = module.get(ConfigService);
   });
 
   describe('create', () => {
@@ -187,6 +207,34 @@ describe('PivotsService', () => {
       prisma.pivot.findUnique.mockResolvedValue(null);
 
       await expect(service.remove(pivotId)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('sendCommand', () => {
+    const pivotId = 'pivot-uuid';
+    const command = { action: PivotAction.TURN_ON, withWater: true, percentimeter: 50 };
+
+    it('should publish command to MQTT when pivot exists', async () => {
+      prisma.pivot.findUnique.mockResolvedValue({ id: pivotId });
+
+      await service.sendCommand(pivotId, command);
+
+      expect(prisma.pivot.findUnique).toHaveBeenCalledWith({
+        where: { id: pivotId },
+      });
+      expect(mqttService.publish).toHaveBeenCalledWith(
+        `soiltech/pivots/${pivotId}/command`,
+        command,
+      );
+    });
+
+    it('should throw NotFoundException when pivot does not exist', async () => {
+      prisma.pivot.findUnique.mockResolvedValue(null);
+
+      await expect(service.sendCommand(pivotId, command)).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(mqttService.publish).not.toHaveBeenCalled();
     });
   });
 });
