@@ -360,20 +360,20 @@
 
 ## TASK-13: Global Error Handling
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-1
 **Estimated complexity**: S
 
 ### Acceptance Criteria
 
-- [ ] `HttpExceptionFilter` in `src/common/filters/` formats all HTTP errors consistently: `{ statusCode, message, error, timestamp, path }`
-- [ ] `PrismaExceptionFilter` maps Prisma known errors to HTTP responses:
+- [x] `HttpExceptionFilter` in `src/common/filters/` formats all HTTP errors consistently: `{ statusCode, message, error, timestamp, path }`
+- [x] `PrismaExceptionFilter` maps Prisma known errors to HTTP responses:
   - `P2002` (unique constraint) → 409 Conflict
   - `P2025` (record not found) → 404 Not Found
   - `P2003` (FK constraint) → 400 Bad Request
-- [ ] `ValidationPipe` applied globally with `whitelist: true` and `forbidNonWhitelisted: true`
-- [ ] All filters registered globally in `main.ts`
-- [ ] Error responses never leaks internal details (stack traces, SQL errors)
+- [x] `ValidationPipe` applied globally with `whitelist: true` and `forbidNonWhitelisted: true`
+- [x] All filters registered globally in `main.ts`
+- [x] Error responses never leaks internal details (stack traces, SQL errors)
 
 ### Implementation Protocol
 
