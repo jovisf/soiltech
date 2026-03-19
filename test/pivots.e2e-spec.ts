@@ -5,11 +5,13 @@ import { AppModule } from '../src/app.module';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Role } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
+import { MqttService } from '@/mqtt/mqtt.service';
 
 describe('Pivots (e2e)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let jwtService: JwtService;
+  let mqttServiceMock: any;
 
   let adminToken: string;
   let operatorToken: string;
@@ -19,9 +21,18 @@ describe('Pivots (e2e)', () => {
   let pivotId: string;
 
   beforeAll(async () => {
+    mqttServiceMock = {
+      publish: jest.fn().mockResolvedValue(undefined),
+      onModuleInit: jest.fn(),
+      onModuleDestroy: jest.fn(),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(MqttService)
+      .useValue(mqttServiceMock)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
@@ -229,6 +240,76 @@ describe('Pivots (e2e)', () => {
         .set('Authorization', `Bearer ${viewerToken}`)
         .send({ name: 'Viewer Try' })
         .expect(403);
+    });
+  });
+
+  describe('POST /pivots/:id/command', () => {
+    it('should allow ADMIN to send a command (turn_on)', async () => {
+      const payload = {
+        action: 'turn_on',
+        direction: 'clockwise',
+        withWater: true,
+        percentimeter: 50,
+      };
+
+      await request(app.getHttpServer())
+        .post(`/pivots/${pivotId}/command`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send(payload)
+        .expect(202);
+
+      expect(mqttServiceMock.publish).toHaveBeenCalled();
+    });
+
+    it('should allow OPERATOR to send a command (turn_off)', async () => {
+      const payload = { action: 'turn_off' };
+
+      await request(app.getHttpServer())
+        .post(`/pivots/${pivotId}/command`)
+        .set('Authorization', `Bearer ${operatorToken}`)
+        .send(payload)
+        .expect(202);
+    });
+
+    it('should return 403 for VIEWER attempting to send a command', async () => {
+      await request(app.getHttpServer())
+        .post(`/pivots/${pivotId}/command`)
+        .set('Authorization', `Bearer ${viewerToken}`)
+        .send({ action: 'turn_on' })
+        .expect(403);
+    });
+
+    it('should return 400 for invalid action', async () => {
+      await request(app.getHttpServer())
+        .post(`/pivots/${pivotId}/command`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ action: 'invalid' })
+        .expect(400);
+    });
+
+    it('should return 400 when percentimeter is missing but withWater is true', async () => {
+      await request(app.getHttpServer())
+        .post(`/pivots/${pivotId}/command`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ action: 'turn_on', withWater: true })
+        .expect(400);
+    });
+
+    it('should return 400 when percentimeter is out of range', async () => {
+      await request(app.getHttpServer())
+        .post(`/pivots/${pivotId}/command`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ action: 'turn_on', withWater: true, percentimeter: 150 })
+        .expect(400);
+    });
+
+    it('should return 404 for nonexistent pivot', async () => {
+      const nonExistentId = '00000000-0000-0000-0000-000000000000';
+      await request(app.getHttpServer())
+        .post(`/pivots/${nonExistentId}/command`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({ action: 'turn_off' })
+        .expect(404);
     });
   });
 
