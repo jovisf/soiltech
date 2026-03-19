@@ -8,10 +8,13 @@ import {
   Delete,
   UseGuards,
   ParseUUIDPipe,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { PivotsService } from './pivots.service';
 import { CreatePivotDto } from './dto/create-pivot.dto';
 import { UpdatePivotDto } from './dto/update-pivot.dto';
+import { PivotCommandDto } from './dto/pivot-command.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -64,6 +67,16 @@ export class PivotsController {
     @Body() updatePivotDto: UpdatePivotDto,
   ) {
     return this.pivotsService.update(id, updatePivotDto);
+  }
+
+  @Post('pivots/:id/command')
+  @Roles(Role.ADMIN, Role.OPERATOR)
+  @HttpCode(HttpStatus.ACCEPTED)
+  async sendCommand(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() pivotCommandDto: PivotCommandDto,
+  ) {
+    await this.pivotsService.sendCommand(id, pivotCommandDto);
   }
 
   @Delete('pivots/:id')
