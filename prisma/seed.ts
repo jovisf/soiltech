@@ -29,6 +29,19 @@ async function main() {
 
   console.log('Admin user created:', admin.email);
 
+  const viewer = await prisma.user.upsert({
+    where: { email: 'viewer@soiltech.com' },
+    update: {},
+    create: {
+      email: 'viewer@soiltech.com',
+      name: 'Viewer',
+      password: hashedPassword,
+      role: Role.VIEWER,
+    },
+  });
+
+  console.log('Viewer user created:', viewer.email);
+
   // Clear existing farms/pivots if they exist to avoid unique constraint issues if any
   await prisma.pivot.deleteMany();
   await prisma.farm.deleteMany();
