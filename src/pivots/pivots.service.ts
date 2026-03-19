@@ -2,10 +2,17 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 import { CreatePivotDto } from './dto/create-pivot.dto';
 import { UpdatePivotDto } from './dto/update-pivot.dto';
+import { PivotCommandDto } from './dto/pivot-command.dto';
+import { MqttService } from '@/mqtt/mqtt.service';
+import { ConfigService } from '@/config/config.service';
 
 @Injectable()
 export class PivotsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mqttService: MqttService,
+    private readonly config: ConfigService,
+  ) {}
 
   async create(farmId: string, createPivotDto: CreatePivotDto) {
     // Validate farm existence
@@ -68,5 +75,13 @@ export class PivotsService {
     return this.prisma.pivot.delete({
       where: { id },
     });
+  }
+
+  async sendCommand(id: string, command: PivotCommandDto) {
+    const pivot = await this.findOne(id);
+    const topicPrefix = this.config.getMqttTopicPrefix();
+    const topic = `${topicPrefix}/${pivot.id}/command`;
+
+    await this.mqttService.publish(topic, command);
   }
 }
