@@ -14,6 +14,7 @@ import { WebsocketModule } from '@/websocket/websocket.module';
 
 import { StatesModule } from '@/states/states.module';
 import { CyclesModule } from '@/cycles/cycles.module';
+import { WeatherModule } from '@/weather/weather.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CyclesModule } from '@/cycles/cycles.module';
     CyclesModule,
     MqttModule,
     WebsocketModule,
+    WeatherModule,
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({

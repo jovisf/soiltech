@@ -1,7 +1,5 @@
-// prisma/schema.prisma
-
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "library"
 }
 
@@ -9,81 +7,75 @@ datasource db {
   provider = "postgresql"
 }
 
-// Enums
-enum Role {
-  ADMIN
-  OPERATOR
-  VIEWER
-}
-
-// Models
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
+  id        String   @id @default(uuid())
+  email     String   @unique
   name      String
   password  String
-  role      Role      @default(VIEWER)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
+  role      Role     @default(VIEWER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("users")
 }
 
 model Farm {
-  id        String    @id @default(uuid())
+  id        String   @id @default(uuid())
   name      String
   latitude  Float
   longitude Float
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
   pivots    Pivot[]
 
   @@map("farms")
 }
 
 model Pivot {
-  id          String    @id @default(uuid())
-  farmId      String    @map("farm_id")
-  name        String
-  latitude    Float
-  longitude   Float
-  status      Json
-  bladeAt100  Float     @map("blade_at_100")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-
-  farm        Farm      @relation(fields: [farmId], references: [id], onDelete: Cascade)
-  states      State[]
+  id         String   @id @default(uuid())
+  name       String
+  latitude   Float
+  longitude  Float
+  status     Json
+  bladeAt100 Float    @map("blade_at_100")
+  createdAt  DateTime @default(now()) @map("created_at")
+  farmId     String   @map("farm_id")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  farm       Farm     @relation(fields: [farmId], references: [id], onDelete: Cascade)
+  states     State[]
 
   @@index([farmId])
   @@map("pivots")
 }
 
 model State {
-  id            String    @id @default(uuid())
-  pivotId       String    @map("pivot_id")
-  timestamp     DateTime
-  isOn          Boolean   @map("is_on")
-  direction     String
-  isIrrigating  Boolean   @map("is_irrigating")
-  
-  pivot         Pivot     @relation(fields: [pivotId], references: [id], onDelete: Cascade)
-  cycles        Cycle[]
+  id           String   @id @default(uuid())
+  timestamp    DateTime
+  direction    String
+  isIrrigating Boolean  @map("is_irrigating")
+  isOn         Boolean  @map("is_on")
+  pivotId      String   @map("pivot_id")
+  cycles       Cycle[]
+  pivot        Pivot    @relation(fields: [pivotId], references: [id], onDelete: Cascade)
 
   @@index([pivotId])
   @@map("states")
 }
 
 model Cycle {
-  id            String    @id @default(uuid())
-  stateId       String    @map("state_id")
+  id            String   @id @default(uuid())
   timestamp     DateTime
   angle         Float
   percentimeter Float
-
-  state         State     @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  stateId       String   @map("state_id")
+  state         State    @relation(fields: [stateId], references: [id], onDelete: Cascade)
 
   @@index([stateId])
   @@map("cycles")
+}
+
+enum Role {
+  ADMIN
+  OPERATOR
+  VIEWER
 }

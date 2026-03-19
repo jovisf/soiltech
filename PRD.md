@@ -100,23 +100,23 @@
 
 ## TASK-4: Users Module
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-3
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] `POST /users` — create user (admin only)
-- [ ] `GET /users` — list all users (admin only)
-- [ ] `GET /users/:id` — get user by ID (admin only)
-- [ ] `PATCH /users/:id` — update user (admin only)
-- [ ] `DELETE /users/:id` — delete user (admin only)
-- [ ] `GET /users/me` — get own profile (any authenticated user)
-- [ ] Password never returned in any response
-- [ ] Role assignment only by admin
-- [ ] All routes protected with JWT + Roles guards
-- [ ] UUID validation on `:id` params via `ParseUUIDPipe`
-- [ ] DTOs with `class-validator` for all inputs
+- [x] `POST /users` — create user (admin only)
+- [x] `GET /users` — list all users (admin only)
+- [x] `GET /users/:id` — get user by ID (admin only)
+- [x] `PATCH /users/:id` — update user (admin only)
+- [x] `DELETE /users/:id` — delete user (admin only)
+- [x] `GET /users/me` — get own profile (any authenticated user)
+- [x] Password never returned in any response
+- [x] Role assignment only by admin
+- [x] All routes protected with JWT + Roles guards
+- [x] UUID validation on `:id` params via `ParseUUIDPipe`
+- [x] DTOs with `class-validator` for all inputs
 
 ### Implementation Protocol
 
@@ -132,20 +132,20 @@
 
 ## TASK-5: Farms Module
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-4
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] `POST /farms` — create farm (admin, operator)
-- [ ] `GET /farms` — list all farms (all authenticated roles)
-- [ ] `GET /farms/:id` — get farm by ID (all authenticated roles)
-- [ ] `PATCH /farms/:id` — update farm (admin, operator)
-- [ ] `DELETE /farms/:id` — delete farm (admin only)
-- [ ] `CreateFarmDto` validates `name` (string, required), `latitude` (float), `longitude` (float)
-- [ ] All routes protected with JWT
-- [ ] Proper error responses: 400 for invalid input, 404 for not found
+- [x] `POST /farms` — create farm (admin, operator)
+- [x] `GET /farms` — list all farms (all authenticated roles)
+- [x] `GET /farms/:id` — get farm by ID (all authenticated roles)
+- [x] `PATCH /farms/:id` — update farm (admin, operator)
+- [x] `DELETE /farms/:id` — delete farm (admin only)
+- [x] `CreateFarmDto` validates `name` (string, required), `latitude` (float), `longitude` (float)
+- [x] All routes protected with JWT
+- [x] Proper error responses: 400 for invalid input, 404 for not found
 
 ### Implementation Protocol
 
@@ -161,20 +161,20 @@
 
 ## TASK-6: Pivots Module
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-5
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] `POST /farms/:farmId/pivots` — create pivot scoped to a farm (admin, operator)
-- [ ] `GET /farms/:farmId/pivots` — list pivots for a farm (all authenticated roles)
-- [ ] `GET /pivots/:id` — get pivot by ID with last `status` JSON (all authenticated roles)
-- [ ] `PATCH /pivots/:id` — update pivot (admin, operator)
-- [ ] `DELETE /pivots/:id` — delete pivot (admin only)
-- [ ] `CreatePivotDto` validates `name`, `latitude`, `longitude`, `bladeAt100` (positive float)
-- [ ] Pivot creation validates that the referenced `farmId` exists
-- [ ] Response includes the `status` JSON field (last MQTT packet)
+- [x] `POST /farms/:farmId/pivots` — create pivot scoped to a farm (admin, operator)
+- [x] `GET /farms/:farmId/pivots` — list pivots for a farm (all authenticated roles)
+- [x] `GET /pivots/:id` — get pivot by ID with last `status` JSON (all authenticated roles)
+- [x] `PATCH /pivots/:id` — update pivot (admin, operator)
+- [x] `DELETE /pivots/:id` — delete pivot (admin only)
+- [x] `CreatePivotDto` validates `name`, `latitude`, `longitude`, `bladeAt100` (positive float)
+- [x] Pivot creation validates that the referenced `farmId` exists
+- [x] Response includes the `status` JSON field (last MQTT packet)
 
 ### Implementation Protocol
 
@@ -190,20 +190,20 @@
 
 ## TASK-7: MQTT Ingestion
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-6
 **Estimated complexity**: L
 
 ### Acceptance Criteria
 
-- [ ] `MqttService` connects to AWS IoT Core using certificate-based auth
-- [ ] Subscribes to `soiltech/pivots/+/telemetry` topic pattern
-- [ ] Raw MQTT packets are enqueued to a BullMQ Redis queue (`mqtt-telemetry`)
-- [ ] Each queued job contains `pivotId`, `rawPayload`, and `receivedAt`
-- [ ] Connection errors are logged, not thrown
-- [ ] `MqttModule` registers the BullMQ queue
-- [ ] Queue is visible in Redis after receiving a message
-- [ ] No processing logic in this task — ingestion only
+- [x] `MqttService` connects to AWS IoT Core using certificate-based auth
+- [x] Subscribes to `soiltech/pivots/+/telemetry` topic pattern
+- [x] Raw MQTT packets are enqueued to a BullMQ Redis queue (`mqtt-telemetry`)
+- [x] Each queued job contains `pivotId`, `rawPayload`, and `receivedAt`
+- [x] Connection errors are logged, not thrown
+- [x] `MqttModule` registers the BullMQ queue
+- [x] Queue is visible in Redis after receiving a message
+- [x] No processing logic in this task — ingestion only
 
 ### Implementation Protocol
 
@@ -219,20 +219,20 @@
 
 ## TASK-8: MQTT Worker
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-7
 **Estimated complexity**: L
 
 ### Acceptance Criteria
 
-- [ ] `MqttProcessor` consumes jobs from the `mqtt-telemetry` queue
-- [ ] Power-on event creates a new `State` record (`isOn: true`)
-- [ ] Telemetry while active creates a new `Cycle` record linked to active `State`
-- [ ] Power-off event updates active `State` to `isOn: false`
-- [ ] `Pivot.status` JSON field is updated with every processed packet
-- [ ] Malformed JSON packets are logged and discarded (dead-letter), never crash the worker
-- [ ] Database errors retry up to 3 times with exponential backoff
-- [ ] Worker emits a WebSocket event after each processed packet (placeholder; full WS in TASK-9)
+- [x] `MqttProcessor` consumes jobs from the `mqtt-telemetry` queue
+- [x] Power-on event creates a new `State` record (`isOn: true`)
+- [x] Telemetry while active creates a new `Cycle` record linked to active `State`
+- [x] Power-off event updates active `State` to `isOn: false`
+- [x] `Pivot.status` JSON field is updated with every processed packet
+- [x] Malformed JSON packets are logged and discarded (dead-letter), never crash the worker
+- [x] Database errors retry up to 3 times with exponential backoff
+- [x] Worker emits a WebSocket event after each processed packet (placeholder; full WS in TASK-9)
 
 ### Implementation Protocol
 
@@ -248,19 +248,19 @@
 
 ## TASK-9: WebSocket Gateway
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-8
 **Estimated complexity**: M
 
 ### Acceptance Criteria
 
-- [ ] `WebSocketGateway` implemented using `@nestjs/websockets` with socket.io adapter
-- [ ] Clients subscribe to updates for a specific `pivotId`
-- [ ] Server emits `pivotStatusUpdate` events with pivot ID and status data
-- [ ] Connection authenticated via JWT (token in handshake query or headers)
-- [ ] Unauthenticated connections rejected
-- [ ] `MqttProcessor` calls `WebsocketGateway.emitPivotUpdate()` after processing
-- [ ] Multiple clients can subscribe to the same pivot simultaneously
+- [x] `WebSocketGateway` implemented using `@nestjs/websockets` with socket.io adapter
+- [x] Clients subscribe to updates for a specific `pivotId`
+- [x] Server emits `pivotStatusUpdate` events with pivot ID and status data
+- [x] Connection authenticated via JWT (token in handshake query or headers)
+- [x] Unauthenticated connections rejected
+- [x] `MqttProcessor` calls `WebsocketGateway.emitPivotUpdate()` after processing
+- [x] Multiple clients can subscribe to the same pivot simultaneously
 
 ### Implementation Protocol
 
@@ -276,19 +276,19 @@
 
 ## TASK-10: History Endpoints
 
-**Status**: TODO
+**Status**: VALIDATED ✓
 **Depends on**: TASK-8
 **Estimated complexity**: S
 
 ### Acceptance Criteria
 
-- [ ] `GET /pivots/:id/states` — returns paginated list of states for a pivot
-- [ ] `GET /pivots/:id/states/:stateId/cycles` — returns paginated cycles for a state
-- [ ] Pagination via `page` and `limit` query params (default: page=1, limit=20)
-- [ ] Response includes `total`, `page`, `limit`, `data` fields
-- [ ] Read-only — all authenticated roles can access
-- [ ] Results ordered by `timestamp` descending
-- [ ] 404 if pivot or state not found
+- [x] `GET /pivots/:id/states` — returns paginated list of states for a pivot
+- [x] `GET /pivots/:id/states/:stateId/cycles` — returns paginated cycles for a state
+- [x] Pagination via `page` and `limit` query params (default: page=1, limit=20)
+- [x] Response includes `total`, `page`, `limit`, `data` fields
+- [x] Read-only — all authenticated roles can access
+- [x] Results ordered by `timestamp` descending
+- [x] 404 if pivot or state not found
 
 ### Implementation Protocol
 
