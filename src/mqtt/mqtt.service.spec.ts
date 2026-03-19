@@ -259,6 +259,50 @@ describe('MqttService', () => {
     });
   });
 
+  describe('publish', () => {
+    beforeEach(() => {
+      service.onModuleInit();
+    });
+
+    it('should publish a message successfully', async () => {
+      mockClient.connected = true;
+      mockClient.publish = jest.fn((topic, payload, options, callback) => {
+        callback(null);
+      });
+
+      const topic = 'test/topic';
+      const payload = { action: 'test' };
+
+      await service.publish(topic, payload);
+
+      expect(mockClient.publish).toHaveBeenCalledWith(
+        topic,
+        JSON.stringify(payload),
+        { qos: 1 },
+        expect.any(Function),
+      );
+    });
+
+    it('should throw ServiceUnavailableException if client is not connected', async () => {
+      mockClient.connected = false;
+
+      await expect(service.publish('topic', {})).rejects.toThrow(
+        'MQTT client is not connected',
+      );
+    });
+
+    it('should throw InternalServerErrorException if publication fails', async () => {
+      mockClient.connected = true;
+      mockClient.publish = jest.fn((topic, payload, options, callback) => {
+        callback(new Error('Publish failed'));
+      });
+
+      await expect(service.publish('topic', {})).rejects.toThrow(
+        'Failed to publish MQTT message: Publish failed',
+      );
+    });
+  });
+
   describe('onModuleDestroy', () => {
     it('should disconnect from MQTT broker', async () => {
       service.onModuleInit();
