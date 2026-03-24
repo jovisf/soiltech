@@ -35,22 +35,36 @@ export class MqttService implements OnModuleInit, OnModuleDestroy {
       const keyPath = this.config.getAwsIotKeyPath();
       const caPath = this.config.getAwsIotCaPath();
 
-      this.client = mqtt.connect(`mqtts://${endpoint}`, {
+      this.client = mqtt.connect(`mqtts://${endpoint}:443`, {
         clientId,
         cert: fs.readFileSync(certPath),
         key: fs.readFileSync(keyPath),
         ca: fs.readFileSync(caPath),
         protocol: 'mqtts',
         reconnectPeriod: 5000,
+        ALPNProtocols: ['x-amzn-mqtt-ca'],
       });
 
       this.client.on('connect', () => {
-        this.logger.log('Connected to AWS IoT Core');
+        this.logger.log('SUCCESS: Connected to AWS IoT Core over Port 443');
         this.subscribe();
       });
 
+      this.client.on('reconnect', () => {
+        this.logger.warn('MQTT Client: attempting to reconnect...');
+      });
+
+      this.client.on('close', () => {
+        this.logger.warn('MQTT Client: connection closed');
+      });
+
+      this.client.on('offline', () => {
+        this.logger.warn('MQTT Client: offline');
+      });
+
       this.client.on('error', (error) => {
-        this.logger.error(`MQTT Connection Error: ${error.message}`);
+        this.logger.error(`MQTT Connection Error: ${JSON.stringify(error)}`);
+        console.error('Full MQTT Error:', error);
       });
 
       this.client.on('message', (topic: string, payload: Buffer) => {

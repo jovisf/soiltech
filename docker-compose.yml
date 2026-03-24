@@ -41,6 +41,8 @@ services:
       REDIS_PORT: ${REDIS_PORT:-6379}
     ports:
       - '3000:3000'
+    volumes:
+      - ./certs:/app/certs:ro
     depends_on:
       postgres:
         condition: service_healthy
